@@ -7,10 +7,10 @@
 <p align="center"><em>formerly Twitch Channel Points Miner v2</em></p>
 
 <p align="center">
-<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=white&logo=github&logoColor=white"></a>
-<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=limegreen&logo=github&logoColor=white"></a>
-<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
-<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
+<a href="https://github.com/Poag/TwitchMiner/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/Poag/TwitchMiner?style=flat&color=white&logo=github&logoColor=white"></a>
+<a href="https://github.com/Poag/TwitchMiner/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Poag/TwitchMiner?style=flat&color=limegreen&logo=github&logoColor=white"></a>
+<a href="https://github.com/Poag/TwitchMiner/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
+<a href="https://github.com/Poag/TwitchMiner"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/TwitchMiner?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
 </p>
 
 > A script that watches streams for you and earns the channel points. It waits for a streamer to go live (+_450 points_ when the stream starts), clicks the bonus button (_+50 points_), follows raids (_+250 points_), claims drops and moments, and keeps the watch streak going.
@@ -25,7 +25,7 @@ This project is free software under the **GNU General Public License v3.0** (see
 - Original idea and code: [gottagofaster236/Twitch-Channel-Points-Miner](https://github.com/gottagofaster236/Twitch-Channel-Points-Miner)
 - v2 rewrite: [Tkd-Alex/Twitch-Channel-Points-Miner-v2](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2)
 - Fork this one is based on: [rdavydov/Twitch-Channel-Points-Miner-v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2)
-- This fork, **TwitchMiner**: [Poag/Twitch-Channel-Points-Miner-v2](https://github.com/Poag/Twitch-Channel-Points-Miner-v2)
+- This fork, **TwitchMiner**: [Poag/TwitchMiner](https://github.com/Poag/TwitchMiner)
 
 As the GPL requires, any copy or modification you distribute must stay under the GPL-3.0 with its source available. The changes made in this fork are in the git history. The icon in `assets/icon.svg` is new in this fork and is released under the same license.
 
@@ -124,7 +124,7 @@ If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIB
 ### Final report:
 ```
 %d/%m/%y %H:%M:%S - 🛑  End session 'f738d438-cdbc-4cd5-90c4-1517576f1299'
-%d/%m/%y %H:%M:%S - 📄  Logs file: /.../path/Twitch-Channel-Points-Miner-v2/logs/username.timestamp.log
+%d/%m/%y %H:%M:%S - 📄  Logs file: /.../path/TwitchMiner/data/logs/username.timestamp.log
 %d/%m/%y %H:%M:%S - ⌛  Duration 10:29:19.547371
 
 %d/%m/%y %H:%M:%S - 🤖  Streamer(username=streamer-username, channel_id=0000000, channel_points=67247), Total points gained (after farming - before farming): -7838
@@ -154,7 +154,7 @@ data/
 Upgrading: move your old `cookies/`, `logs/` and `analytics/<username>/` folders into the data folder (the old `analytics/` folder becomes `data/analytics/`).
 
 ### By cloning the repository
-1. Clone this repository `git clone https://github.com/Poag/Twitch-Channel-Points-Miner-v2`
+1. Clone this repository `git clone https://github.com/Poag/TwitchMiner`
 2. Install the requirements `pip install -r requirements.txt` (use a _virtualenv_ if you like).
 3. Configure and start mining:
 ```sh
@@ -165,14 +165,14 @@ python -m TwitchChannelPointsMiner
 If you don't set `TCPM_PASSWORD` the miner asks for it interactively on the first login.
 
 ### Docker
-Images are published to `ghcr.io/poag/twitch-channel-points-miner-v2` for `linux/amd64` and `linux/arm64` (`latest` follows `main` and is rebuilt monthly).
+Images are published to `ghcr.io/poag/twitchminer` for `linux/amd64` and `linux/arm64` (`latest` follows `main` and is rebuilt monthly).
 
 **Example using docker-compose:**
 
 ```yml
 services:
   miner:
-    image: ghcr.io/poag/twitch-channel-points-miner-v2:latest
+    image: ghcr.io/poag/twitchminer:latest
     stdin_open: true
     tty: true
     env_file: .env          # or list the TCPM_* variables under `environment:`
@@ -186,7 +186,7 @@ services:
 
 **Example with docker run:**
 ```sh
-docker run -it --env-file .env -v $(pwd)/data:/data -p 5000:5000 ghcr.io/poag/twitch-channel-points-miner-v2:latest
+docker run -it --env-file .env -v $(pwd)/data:/data -p 5000:5000 ghcr.io/poag/twitchminer:latest
 ```
 
 If you don't mount `/data` you lose the login, logs and analytics when the container is removed. On the first run, without a cookie, start the container with `-it` so you can log in. For several accounts run one container per account, each with its own `.env` and data folder (and its own published port).
@@ -346,11 +346,11 @@ pkg install python-pandas
 
 **4. Clone this repository**
 
-`git clone https://github.com/Poag/Twitch-Channel-Points-Miner-v2`
+`git clone https://github.com/Poag/TwitchMiner`
 
 **5. Go to the miner's directory**
 
-`cd Twitch-Channel-Points-Miner-v2`
+`cd TwitchMiner`
 
 **6. Configure your miner on your preferences by typing**
 
