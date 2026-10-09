@@ -233,7 +233,10 @@ class Twitch(object):
                     last_cursor = f["cursor"]
 
                 has_next = follows_response["pageInfo"]["hasNextPage"]
-            except KeyError:
+            except (KeyError, TypeError):
+                logger.error(
+                    f"Could not read your followed channels from Twitch, response: {str(json_response)[:500]}"
+                )
                 return []
         return follows
 
