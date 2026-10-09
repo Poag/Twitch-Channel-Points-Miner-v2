@@ -11,6 +11,7 @@ import random
 import re
 import string
 import time
+from datetime import datetime
 import requests
 import validators
 # import json
@@ -22,9 +23,10 @@ from typing import Dict, Any
 # from base64 import urlsafe_b64decode
 # from datetime import datetime
 
-from TwitchChannelPointsMiner.classes.entities.Campaign import Campaign
+from TwitchChannelPointsMiner.classes.entities.Campaign import Campaign, parse_datetime
 from TwitchChannelPointsMiner.classes.entities.CommunityGoal import CommunityGoal
 from TwitchChannelPointsMiner.classes.entities.Drop import Drop
+from TwitchChannelPointsMiner.classes.DropsDB import DropsDB
 from TwitchChannelPointsMiner.classes.Exceptions import (
     StreamerDoesNotExistException,
     StreamerIsOfflineException,
@@ -55,6 +57,7 @@ JsonType = Dict[str, Any]
 class Twitch(object):
     __slots__ = [
         "cookies_file",
+        "drops_db",
         "user_agent",
         "twitch_login",
         "running",
@@ -70,6 +73,7 @@ class Twitch(object):
         cookies_path = os.path.join(Path().absolute(), "cookies")
         Path(cookies_path).mkdir(parents=True, exist_ok=True)
         self.cookies_file = os.path.join(cookies_path, f"{username}.pkl")
+        self.drops_db = DropsDB(os.path.join(cookies_path, f"{username}_drops.db"))
         self.user_agent = user_agent
         self.device_id = "".join(
             choice(string.ascii_letters + string.digits) for _ in range(32)
@@ -891,7 +895,7 @@ class Twitch(object):
                     if progress["id"] == campaigns[i].id:
                         campaigns[i].in_inventory = True
                         campaigns[i].sync_drops(
-                            progress["timeBasedDrops"], self.claim_drop
+                            progress["timeBasedDrops"], self.claim_drop_once
                         )
                         # Remove all the claimed drops
                         campaigns[i].clear_drops()
@@ -926,17 +930,61 @@ class Twitch(object):
         except (ValueError, KeyError):
             return False
 
+    def claim_drop_once(self, drop, campaign_id, game, is_account_connected, end_at):
+        """Claim a drop at most one time, ever. Returns True when the drop is claimed.
+
+        - Drops we already tried (successfully or not) are never retried.
+        - Drops of a game whose account is not connected are skipped without being
+          recorded, so they are claimed once the account gets connected. The user is
+          warned about the game once a day.
+        """
+        if self.drops_db.was_attempted(drop.id):
+            return self.drops_db.was_claimed(drop.id)
+        if is_account_connected is False:
+            self.__warn_account_not_connected(game, end_at)
+            return False
+        claimed = self.claim_drop(drop)
+        # A failed claim is also stored: we don't try the same drop again
+        self.drops_db.record_attempt(drop.id, drop.name, game, claimed)
+        return claimed
+
+    def __warn_account_not_connected(self, game, end_at):
+        if not self.drops_db.should_notify_game(game):
+            return
+        remaining = ""
+        if end_at is not None:
+            seconds = int((end_at - datetime.utcnow()).total_seconds())
+            if seconds > 0:
+                days, rest = divmod(seconds, 86400)
+                hours, rest = divmod(rest, 3600)
+                remaining = f" - campaign ends in {days}d {hours}h {rest // 60}m"
+            else:
+                remaining = " - campaign has ended"
+        logger.warning(
+            f"Drops available for {game} but your account is not connected to the game, "
+            f"not claiming{remaining}. Connect it at https://www.twitch.tv/drops/inventory",
+            extra={"emoji": ":link:", "event": Events.DROP_CLAIM},
+        )
+
     def claim_all_drops_from_inventory(self):
         inventory = self.__get_inventory()
         if inventory not in [None, {}]:
             if inventory["dropCampaignsInProgress"] not in [None, {}]:
                 for campaign in inventory["dropCampaignsInProgress"]:
+                    game = (campaign.get("game") or {}).get("displayName") or campaign.get("name")
+                    connected = (campaign.get("self") or {}).get("isAccountConnected")
+                    end_at = (
+                        parse_datetime(campaign["endAt"]) if campaign.get("endAt") else None
+                    )
                     for drop_dict in campaign["timeBasedDrops"]:
                         drop = Drop(drop_dict)
                         drop.update(drop_dict["self"])
-                        if drop.is_claimable is True:
-                            drop.is_claimed = self.claim_drop(drop)
-                            time.sleep(random.uniform(5, 10))
+                        if drop.is_claimable is True and not self.drops_db.was_attempted(drop.id):
+                            drop.is_claimed = self.claim_drop_once(
+                                drop, campaign["id"], game, connected, end_at
+                            )
+                            if connected is not False:
+                                time.sleep(random.uniform(5, 10))
 
     def sync_campaigns(self, streamers, chunk_size=3):
         campaigns_update = 0
