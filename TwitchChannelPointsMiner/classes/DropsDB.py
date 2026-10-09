@@ -18,6 +18,10 @@ class DropsDB(object):
                 "drop_id TEXT PRIMARY KEY, name TEXT, game TEXT, "
                 "claimed INTEGER NOT NULL, attempted_at REAL NOT NULL)"
             )
+            # Older databases have no benefit column
+            columns = [row[1] for row in db.execute("PRAGMA table_info(drops)")]
+            if "benefit" not in columns:
+                db.execute("ALTER TABLE drops ADD COLUMN benefit TEXT")
             db.execute(
                 "CREATE TABLE IF NOT EXISTS game_notices ("
                 "game TEXT PRIMARY KEY, notified_at REAL NOT NULL)"
@@ -42,12 +46,33 @@ class DropsDB(object):
             ).fetchone()
             return row is not None and row[0] == 1
 
-    def record_attempt(self, drop_id, name, game, claimed):
+    def record_attempt(self, drop_id, name, game, claimed, benefit=None):
         with closing(self.__connect()) as db, db:
             db.execute(
-                "INSERT OR REPLACE INTO drops VALUES (?, ?, ?, ?, ?)",
-                (drop_id, name, game, int(claimed), time.time()),
+                "INSERT OR REPLACE INTO drops "
+                "(drop_id, name, game, claimed, attempted_at, benefit) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (drop_id, name, game, int(claimed), time.time(), benefit),
             )
+
+    def recent(self, limit=200):
+        """Newest first: [{name, benefit, game, claimed, at}], `at` in milliseconds."""
+        with closing(self.__connect()) as db:
+            rows = db.execute(
+                "SELECT name, benefit, game, claimed, attempted_at FROM drops "
+                "ORDER BY attempted_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [
+            {
+                "name": name,
+                "benefit": benefit,
+                "game": game,
+                "claimed": bool(claimed),
+                "at": int(at * 1000),
+            }
+            for name, benefit, game, claimed, at in rows
+        ]
 
     def should_notify_game(self, game):
         """True (and the notice is recorded) when this game was not warned about in the last day."""
