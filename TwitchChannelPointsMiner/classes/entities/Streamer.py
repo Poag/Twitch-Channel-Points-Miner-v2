@@ -88,6 +88,7 @@ class Streamer(object):
         "history",
         "streamer_url",
         "mutex",
+        "analytics_data",
     ]
 
     def __init__(self, username, settings=None):
@@ -113,6 +114,8 @@ class Streamer(object):
         self.streamer_url = f"{URL}/{self.username}"
 
         self.mutex = Lock()
+        # Parsed analytics file, kept in memory so each event doesn't re-read and re-parse it
+        self.analytics_data = None
 
     def __repr__(self):
         return f"Streamer(username={self.username}, channel_id={self.channel_id}, channel_points={_millify(self.channel_points)})"
@@ -250,13 +253,19 @@ class Streamer(object):
         temp_fname = fname + ".temp"  # Temporary file name
 
         with self.mutex:
-            # Create and write to the temporary file
+            if self.analytics_data is None:
+                if os.path.isfile(fname):
+                    with open(fname, "r") as f:
+                        self.analytics_data = json.load(f)
+                else:
+                    self.analytics_data = {}
+            json_data = self.analytics_data
+            if key not in json_data:
+                json_data[key] = []
+            json_data[key].append(data)
+            # Create and write to the temporary file (compact: no indentation)
             with open(temp_fname, "w") as temp_file:
-                json_data = json.load(open(fname, "r")) if os.path.isfile(fname) else {}
-                if key not in json_data:
-                    json_data[key] = []
-                json_data[key].append(data)
-                json.dump(json_data, temp_file, indent=4)
+                json.dump(json_data, temp_file, separators=(",", ":"))
 
             # Replace the original file with the temporary file
             os.replace(temp_fname, fname)

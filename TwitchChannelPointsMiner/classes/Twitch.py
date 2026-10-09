@@ -1025,6 +1025,12 @@ class Twitch(object):
                         else:
                             continue
 
+                # Nothing to track unless a streamer is online with an active campaign:
+                # skip the per-minute inventory request (claims still run every 15 minutes)
+                if not any(s.drops_condition() for s in streamers):
+                    self.__chuncked_sleep(60, chunk_size=chunk_size)
+                    continue
+
                 # Divide et impera :)
                 campaigns = self.__sync_campaigns(campaigns)
 
