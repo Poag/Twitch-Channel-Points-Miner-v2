@@ -1,47 +1,14 @@
-FROM python:3.10-bullseye
-
-ARG BUILDX_QEMU_ENV
+FROM python:3.12-slim-bookworm
 
 WORKDIR /usr/src/app
 
 COPY ./requirements.txt ./
 
-ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
-
-RUN pip install --upgrade pip
-
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -qq -y --fix-missing --no-install-recommends \
-    gcc \
-    libffi-dev \
-    rustc \
-    zlib1g-dev \
-    libjpeg-dev \
-    libssl-dev \
-    libblas-dev \
-    liblapack-dev \
-    make \
-    cmake \    
-    automake \
-    ninja-build \
-    g++ \
-    subversion \
-    python3-dev \
-    python3.9 \
-    python3.9-dev \
-    python3.9-minimal \
-  && if [ "${BUILDX_QEMU_ENV}" = "true" ] && [ "$(getconf LONG_BIT)" = "32" ]; then \
-        pip install -U cryptography==3.3.2; \
-     fi \
-  && pip install -r requirements.txt \
-  && pip cache purge \
-  && apt-get remove -y gcc rustc \
-  && apt-get autoremove -y \
-  && apt-get autoclean -y \
-  && apt-get clean -y \
-  && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /usr/share/doc/*
+# Every compiled dependency (pandas, pillow) ships manylinux wheels for amd64 and
+# arm64, so no compilers or -dev packages are needed. Security updates come from
+# the base image, which the monthly rebuild pulls fresh.
+RUN pip install --no-cache-dir --upgrade pip \
+  && pip install --no-cache-dir -r requirements.txt
 
 ADD ./TwitchChannelPointsMiner ./TwitchChannelPointsMiner
 ENTRYPOINT [ "python", "run.py" ]
