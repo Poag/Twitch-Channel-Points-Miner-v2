@@ -13,7 +13,7 @@
 <a href="https://github.com/Poag/TwitchMiner"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/TwitchMiner?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
 </p>
 
-> A script that watches streams for you and earns the channel points. It waits for a streamer to go live (+_450 points_ when the stream starts), clicks the bonus button (_+50 points_), follows raids (_+250 points_), claims drops and moments, and keeps the watch streak going.
+> A script that watches streams for you and earns the channel points. It waits for a streamer to go live (+_450 points_ when the stream starts), clicks the bonus button (_+50 points_), follows raids (_+250 points_), claims drops and keeps the watch streak going.
 
 Read more about the channel points [here](https://help.twitch.tv/s/article/channel-points-guide).
 
@@ -71,7 +71,6 @@ If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIB
 - Auto claiming [game drops](https://help.twitch.tv/s/article/mission-based-drops) from the Twitch inventory [#21](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/21)
 - Switchable analytics chart that shows the progress of your points [#96](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/96)
 - Joining the IRC Chat to increase the watch time and get StreamElements points [#47](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/47)
-- [Moments](https://help.twitch.tv/s/article/moments) claiming [#182](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/182)
 - Notifying on `@nickname` mention in the Twitch chat [#227](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/227)
 - Notifications to Telegram, Discord, Matrix, Pushover, Gotify and generic webhooks
 
@@ -241,7 +240,6 @@ Defaults for every streamer (a per-streamer override wins).
 |---|---|---|
 | `TCPM_FOLLOW_RAID` | `true` | Follow raids (+250 points) |
 | `TCPM_CLAIM_DROPS` | `true` | Increase watch-time for the current game so you can claim [drops](https://help.twitch.tv/s/article/mission-based-drops) |
-| `TCPM_CLAIM_MOMENTS` | `true` | Claim [moments](https://help.twitch.tv/s/article/moments) when available |
 | `TCPM_WATCH_STREAK` | `true` | Raise the priority of a streamer that just went online to catch the Watch Streak |
 | `TCPM_COMMUNITY_GOALS` | `false` | Contribute the max channel points per stream to community goals |
 | `TCPM_CHAT` | `ONLINE` | IRC chat presence: `ALWAYS`, `NEVER`, `ONLINE` (only while the streamer is online), `OFFLINE` |
@@ -281,7 +279,6 @@ A notifier is enabled when its required variables are set. `*_EVENTS` is a comma
  - `GAIN_FOR_CLAIM`
  - `GAIN_FOR_WATCH`
  - `BONUS_CLAIM`
- - `MOMENT_CLAIM`
  - `JOIN_RAID`
  - `DROP_CLAIM`
  - `DROP_STATUS`
