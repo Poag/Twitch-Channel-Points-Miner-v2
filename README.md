@@ -167,7 +167,9 @@ If you don't set `TCPM_PASSWORD` the miner asks for it interactively on the firs
 ### Docker
 Images are published to `ghcr.io/poag/twitchminer` for `linux/amd64` and `linux/arm64` (`latest` follows `main` and is rebuilt monthly).
 
-**Example using docker-compose:**
+**Ready-made stack:** [compose.yaml](compose.yaml) (with a commented second-account example). Copy `.env.example` to `.env`, edit it, run `docker compose run --rm miner` once to log in, then `docker compose up -d`.
+
+**Minimal docker-compose example:**
 
 ```yml
 services:
