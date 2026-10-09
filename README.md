@@ -7,7 +7,6 @@
 <p align="center"><em>formerly Twitch Channel Points Miner v2</em></p>
 
 <p align="center">
-<a href="https://github.com/Poag/TwitchMiner/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/Poag/TwitchMiner?style=flat&color=white&logo=github&logoColor=white"></a>
 <a href="https://github.com/Poag/TwitchMiner/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Poag/TwitchMiner?style=flat&color=limegreen&logo=github&logoColor=white"></a>
 <a href="https://github.com/Poag/TwitchMiner/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
 <a href="https://github.com/Poag/TwitchMiner"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/TwitchMiner?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
