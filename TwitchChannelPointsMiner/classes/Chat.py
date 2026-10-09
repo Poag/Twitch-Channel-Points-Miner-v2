@@ -39,8 +39,9 @@ class ClientIRC(SingleServerIRCBot):
         self._connect()
         while self.__active:
             try:
-                self.reactor.process_once(timeout=0.2)
-                time.sleep(0.01)
+                # process_once blocks in select() until data arrives or the timeout
+                # expires, so no extra sleep is needed (it only added wakeups)
+                self.reactor.process_once(timeout=1.0)
             except Exception as e:
                 logger.error(
                     f"Exception raised: {e}. Thread is active: {self.__active}"

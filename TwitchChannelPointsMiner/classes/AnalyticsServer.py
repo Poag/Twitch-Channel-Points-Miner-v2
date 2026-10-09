@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from threading import Thread
 
-import pandas as pd
 from flask import Flask, Response, cli, render_template, request
 
 from TwitchChannelPointsMiner.classes.Settings import Settings
@@ -25,6 +24,8 @@ def streamers_available():
 
 
 def aggregate(df, freq="30Min"):
+    import pandas as pd  # lazy: only needed when the analytics page is served
+
     df_base_events = df[(df.z == "Watch") | (df.z == "Claim")]
     df_other_events = df[(df.z != "Watch") & (df.z != "Claim")]
 
@@ -41,6 +42,8 @@ def aggregate(df, freq="30Min"):
 
 
 def filter_datas(start_date, end_date, datas):
+    import pandas as pd
+
     # Note: https://stackoverflow.com/questions/4676195/why-do-i-need-to-multiply-unix-timestamps-by-1000-in-javascript
     start_date = (
         datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000
