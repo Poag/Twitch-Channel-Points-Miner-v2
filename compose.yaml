@@ -9,6 +9,7 @@
 services:
   miner:
     image: ghcr.io/poag/twitchminer:latest
+    # To test your own changes instead, replace `image` with:  build: .
     container_name: twitchminer
     restart: unless-stopped
     # Needed for the interactive Twitch login on the first run (no cookie yet)

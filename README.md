@@ -36,15 +36,11 @@ As the GPL requires, any copy or modification you distribute must stay under the
     - [Final report](#final-report)
 3. 🧐 [How to use](#how-to-use)
     - [Data folder](#data-folder)
-    - [Cloning](#by-cloning-the-repository)
     - [Docker](#docker)
     - [Limits](#limits)
 4. 🔧 [Settings](#settings)
 5. 📈 [Analytics](#analytics)
 6. 🍪 [Migrating from an old repository](#migrating-from-an-old-repository-the-original-one)
-7. 🪟 [Windows](#windows)
-8. 📱 [Termux](#termux)
-9. ⚠️ [Disclaimer](#disclaimer)
 
 If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
@@ -136,10 +132,12 @@ If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIB
 ```
 
 ## How to use:
+**Docker is the only supported way to run TwitchMiner.** Running it straight from the source is only meant for development (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+
 All configuration is done with environment variables (prefix `TCPM_`). Copy [.env.example](.env.example) to `.env`, fill it in and start the miner. There is no `run.py` to edit anymore.
 
 ### Data folder
-Everything the miner writes lives in **one folder**, `TCPM_DATA_DIR` (default `./data`, `/data` in Docker). Mount just this folder:
+Everything the miner writes lives in **one folder**, `TCPM_DATA_DIR` (`/data` in the Docker image). Mount just this folder:
 
 ```
 data/
@@ -151,21 +149,12 @@ data/
 
 Upgrading: move your old `cookies/`, `logs/` and `analytics/<username>/` folders into the data folder (the old `analytics/` folder becomes `data/analytics/`).
 
-### By cloning the repository
-1. Clone this repository `git clone https://github.com/Poag/TwitchMiner`
-2. Install the requirements `pip install -r requirements.txt` (use a _virtualenv_ if you like).
-3. Configure and start mining:
-```sh
-cp .env.example .env      # edit it
-set -a; . ./.env; set +a  # load the variables into your shell
-python -m TwitchChannelPointsMiner
-```
-If you don't set `TCPM_PASSWORD` the miner asks for it interactively on the first login.
-
 ### Docker
 Images are published to `ghcr.io/poag/twitchminer` for `linux/amd64` and `linux/arm64` (`latest` follows `main` and is rebuilt monthly).
 
 **Ready-made stack:** [compose.yaml](compose.yaml) (with a commented second-account example). Copy `.env.example` to `.env`, edit it, run `docker compose run --rm miner` once to log in, then `docker compose up -d`.
+
+**Unraid:** install the beta [TwitchMiner template](https://github.com/Poag/docker-xml/blob/master/templates/twitchminer.xml) from the `docker-xml` repository (Community Applications style template; add the repository URL `https://github.com/Poag/docker-xml` to your template repositories).
 
 **Minimal docker-compose example:**
 
@@ -312,66 +301,3 @@ If you already have a `twitch-cookies.pkl` and you don't want to log in again, p
 |   +-- cookies
 |       +-- your-twitch-username.pkl
 ```
-
-## Windows
-Other users have find multiple problems on Windows. Suggestions are:
- - Stop using Windows :stuck_out_tongue_closed_eyes:
- - Suppress the emoji in logs with `TCPM_LOG_EMOJI=false`
-
-Other useful info can be found here:
-- https://github.com/gottagofaster236/Twitch-Channel-Points-Miner/issues/31
-- https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/55
-
-You can also follow this [video tutorial](https://www.youtube.com/watch?v=0VkM7NOZkuA).
-
-## Termux
-**1. Upgrade packages**
-```
-pkg upgrade
-```
-
-**2. Install packages to Termux**
-```
-pkg install python git rust libjpeg-turbo libcrypt ndk-sysroot clang zlib binutils tur-repo python-cryptography
-LDFLAGS="-L${PREFIX}/lib/" CFLAGS="-I${PREFIX}/include/" pip install --upgrade wheel pillow
-```
-Note: `pkg install tur-repo` will basically enable the [user repository](https://github.com/termux-user-repository/tur) _(Very similar to Arch AUR)_ and `python-pandas` pre-compiled package comes exactly from this repository.
-
-**3. Install pandas**
-```
-pkg install python-pandas
-```
-
-**4. Clone this repository**
-
-`git clone https://github.com/Poag/TwitchMiner`
-
-**5. Go to the miner's directory**
-
-`cd TwitchMiner`
-
-**6. Configure your miner on your preferences by typing**
-
-`cp .env.example .env && nano .env`
-
-**7. Install packages**
-```
-pip install -r requirements.txt
-```
-
-**8. Run the miner!**
-
-`set -a; . ./.env; set +a; python -m TwitchChannelPointsMiner`
-
-Read more at [#92](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/92) [#76](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/76)
-
-**Note**
-
-If you can't install `cryptography`, please try:
-
-`export RUSTFLAGS=" -C lto=no" && export CARGO_BUILD_TARGET="$(rustc -vV | sed -n 's|host: ||p')" && pip install cryptography`
-
-⚠️ Installation of `pandas`, `maturin` and `cryptography` takes a long time.
-
-## Disclaimer
-This project comes with no guarantee or warranty. You are responsible for whatever happens from using this project. It is possible to get soft or hard banned by using this project if you are not careful. This is a personal project and is in no way affiliated with Twitch.
