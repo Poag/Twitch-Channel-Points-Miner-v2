@@ -1,0 +1,46 @@
+# Example stack for TwitchMiner.
+#
+#   cp .env.example .env     # edit TCPM_USERNAME, TCPM_STREAMERS, ...
+#   docker compose run --rm miner     # first run only: log in interactively, then Ctrl+C
+#   docker compose up -d
+#   docker compose logs -f miner
+#
+# Everything the miner writes (cookies, drops database, logs, analytics) lives in ./data.
+services:
+  miner:
+    image: ghcr.io/poag/twitchminer:latest
+    container_name: twitchminer
+    restart: unless-stopped
+    # Needed for the interactive Twitch login on the first run (no cookie yet)
+    stdin_open: true
+    tty: true
+    env_file: .env
+    environment:
+      TERM: xterm-256color
+      # Settings that only make sense in a container can live here and override .env
+      TCPM_DATA_DIR: /data
+      TCPM_ANALYTICS_HOST: 0.0.0.0
+      # TZ is used by the container; TCPM_TIME_ZONE sets the log time zone
+      TZ: ${TZ:-UTC}
+    volumes:
+      - ./data:/data
+    ports:
+      # Analytics page, only reachable when TCPM_ENABLE_ANALYTICS=true.
+      # Bound to localhost; remove "127.0.0.1:" to expose it on your network.
+      - "127.0.0.1:5000:5000"
+
+  # A second account: its own .env file and its own data folder (and port).
+  # miner2:
+  #   image: ghcr.io/poag/twitchminer:latest
+  #   container_name: twitchminer2
+  #   restart: unless-stopped
+  #   stdin_open: true
+  #   tty: true
+  #   env_file: .env.account2
+  #   environment:
+  #     TERM: xterm-256color
+  #     TCPM_ANALYTICS_HOST: 0.0.0.0
+  #   volumes:
+  #     - ./data2:/data
+  #   ports:
+  #     - "127.0.0.1:5001:5000"
