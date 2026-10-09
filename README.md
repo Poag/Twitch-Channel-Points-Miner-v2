@@ -209,8 +209,8 @@ All settings are environment variables. Booleans accept `true/false`, `1/0`, `ye
 | `TCPM_DATA_DIR` | `./data` (`/data` in Docker) | The single folder for cookies, database, logs and analytics |
 | `TCPM_STREAMERS` | _empty_ | Streamers in priority order, see below |
 | `TCPM_BLACKLIST` | _empty_ | Streamers to skip (useful with `TCPM_FOLLOWERS`) |
-| `TCPM_FOLLOWERS` | `false` | Download the list of your followers and mine them |
-| `TCPM_FOLLOWERS_ORDER` | `ASC` | Sort followers by follow date: `ASC` or `DESC` |
+| `TCPM_FOLLOWERS` | `false` | Also mine every channel **you follow** on Twitch. They are added after `TCPM_STREAMERS` (so those keep priority) and the log shows `Load N followers from your profile!` |
+| `TCPM_FOLLOWERS_ORDER` | `ASC` | Order of the followed channels by follow date: `ASC` or `DESC` |
 | `TCPM_CLAIM_DROPS_STARTUP` | `false` | Claim all drops from the Twitch inventory on startup |
 | `TCPM_PRIORITY` | `STREAK,DROPS,ORDER` | Priority list, see below |
 | `TCPM_ENABLE_ANALYTICS` | `false` | Enable analytics. Disabling it significantly reduces memory use and disk writes |

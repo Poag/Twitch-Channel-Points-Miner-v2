@@ -286,4 +286,8 @@ def main():
         sys.exit(2)
     if analytics_kwargs is not None:
         miner.analytics(**analytics_kwargs)
+    else:
+        logging.getLogger(__name__).info(
+            "Analytics web page is off. Set TCPM_ENABLE_ANALYTICS=true to serve it on port 5000."
+        )
     miner.mine(**mine_kwargs)

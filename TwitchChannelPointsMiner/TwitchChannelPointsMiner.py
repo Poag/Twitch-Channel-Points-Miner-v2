@@ -203,7 +203,12 @@ class TwitchChannelPointsMiner:
         followers: bool = False,
         followers_order: FollowersOrder = FollowersOrder.ASC,
     ):
-        self.run(streamers=streamers, blacklist=blacklist, followers=followers)
+        self.run(
+            streamers=streamers,
+            blacklist=blacklist,
+            followers=followers,
+            followers_order=followers_order,
+        )
 
     def run(
         self,
@@ -245,6 +250,11 @@ class TwitchChannelPointsMiner:
                     f"Load {len(followers_array)} followers from your profile!",
                     extra={"emoji": ":clipboard:"},
                 )
+                if not followers_array:
+                    logger.warning(
+                        "No followed channels were loaded. Check the error above, or "
+                        "list streamers in TCPM_STREAMERS instead."
+                    )
                 for username in followers_array:
                     if username not in streamers_dict and username not in blacklist:
                         streamers_name.append(username)
