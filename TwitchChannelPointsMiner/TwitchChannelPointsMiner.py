@@ -59,7 +59,6 @@ class TwitchChannelPointsMiner:
         "disable_at_in_nickname",
         "priority",
         "streamers",
-        "events_predictions",
         "minute_watcher_thread",
         "sync_campaigns_thread",
         "ws_pool",
@@ -132,7 +131,6 @@ class TwitchChannelPointsMiner:
 
         # Init as default all the missing values
         streamer_settings.default()
-        streamer_settings.bet.default()
         Settings.streamer_settings = streamer_settings
 
         # user_agent = get_user_agent("FIREFOX")
@@ -143,7 +141,6 @@ class TwitchChannelPointsMiner:
         self.priority = priority if isinstance(priority, list) else [priority]
 
         self.streamers: list[Streamer] = []
-        self.events_predictions = {}
         self.minute_watcher_thread = None
         self.sync_campaigns_thread = None
         self.ws_pool = None
@@ -272,9 +269,6 @@ class TwitchChannelPointsMiner:
                         streamer.settings = set_default_settings(
                             streamer.settings, Settings.streamer_settings
                         )
-                        streamer.settings.bet = set_default_settings(
-                            streamer.settings.bet, Settings.streamer_settings.bet
-                        )
                         if streamer.settings.chat != ChatPresence.NEVER:
                             streamer.irc_chat = ThreadChat(
                                 self.username,
@@ -291,7 +285,7 @@ class TwitchChannelPointsMiner:
             # Populate the streamers with default values.
             # 1. Load channel points and auto-claim bonus
             # 2. Check if streamers are online
-            # 3. DEACTIVATED: Check if the user is a moderator. (was used before the 5th of April 2021 to deactivate predictions)
+            # 3. DEACTIVATED: Check if the user is a moderator.
             for streamer in self.streamers:
                 time.sleep(random.uniform(0.3, 0.7))
                 try:
@@ -307,11 +301,6 @@ class TwitchChannelPointsMiner:
             self.original_streamers = [
                 streamer.channel_points for streamer in self.streamers
             ]
-
-            # If we have at least one streamer with settings = make_predictions True
-            make_predictions = at_least_one_value_in_settings_is(
-                self.streamers, "make_predictions", True
-            )
 
             # If we have at least one streamer with settings = claim_drops True
             # Spawn a thread for sync inventory and dashboard
@@ -337,7 +326,6 @@ class TwitchChannelPointsMiner:
             self.ws_pool = WebSocketsPool(
                 twitch=self.twitch,
                 streamers=self.streamers,
-                events_predictions=self.events_predictions,
             )
 
             # Subscribe to community-points-user. Get update for points spent or gains
@@ -356,15 +344,6 @@ class TwitchChannelPointsMiner:
                 )
             )
 
-            # Going to subscribe to predictions-user-v1. Get update when we place a new prediction (confirm)
-            if make_predictions is True:
-                self.ws_pool.submit(
-                    PubsubTopic(
-                        "predictions-user-v1",
-                        user_id=user_id,
-                    )
-                )
-
             for streamer in self.streamers:
                 self.ws_pool.submit(
                     PubsubTopic("video-playback-by-id", streamer=streamer)
@@ -372,11 +351,6 @@ class TwitchChannelPointsMiner:
 
                 if streamer.settings.follow_raid is True:
                     self.ws_pool.submit(PubsubTopic("raid", streamer=streamer))
-
-                if streamer.settings.make_predictions is True:
-                    self.ws_pool.submit(
-                        PubsubTopic("predictions-channel-v1", streamer=streamer)
-                    )
 
                 if streamer.settings.claim_moments is True:
                     self.ws_pool.submit(
@@ -464,28 +438,6 @@ class TwitchChannelPointsMiner:
             f"Duration {datetime.now() - self.start_datetime}",
             extra={"emoji": ":hourglass:"},
         )
-
-        if not Settings.logger.less and self.events_predictions != {}:
-            print("")
-            for event_id in self.events_predictions:
-                event = self.events_predictions[event_id]
-                if (
-                    event.bet_confirmed is True
-                    and event.streamer.settings.make_predictions is True
-                ):
-                    logger.info(
-                        f"{event.streamer.settings.bet}",
-                        extra={"emoji": ":wrench:"},
-                    )
-                    if event.streamer.settings.bet.filter_condition is not None:
-                        logger.info(
-                            f"{event.streamer.settings.bet.filter_condition}",
-                            extra={"emoji": ":pushpin:"},
-                        )
-                    logger.info(
-                        f"{event.print_recap()}",
-                        extra={"emoji": ":bar_chart:"},
-                    )
 
         print("")
         for streamer_index in range(0, len(self.streamers)):

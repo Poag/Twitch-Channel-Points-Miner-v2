@@ -12,7 +12,6 @@ from TwitchChannelPointsMiner.classes.Matrix import Matrix
 from TwitchChannelPointsMiner.classes.Pushover import Pushover
 from TwitchChannelPointsMiner.classes.Gotify import Gotify
 from TwitchChannelPointsMiner.classes.Settings import Priority, Events, FollowersOrder
-from TwitchChannelPointsMiner.classes.entities.Bet import Strategy, BetSettings, Condition, OutcomeKeys, FilterCondition, DelayMode
 from TwitchChannelPointsMiner.classes.entities.Streamer import Streamer, StreamerSettings
 
 twitch_miner = TwitchChannelPointsMiner(
@@ -40,32 +39,31 @@ twitch_miner = TwitchChannelPointsMiner(
         color_palette=ColorPalette(             # You can also create a custom palette color (for the common message).
             STREAMER_online="GREEN",            # Don't worry about lower/upper case. The script will parse all the values.
             streamer_offline="red",             # Read more in README.md
-            BET_wiN=Fore.MAGENTA                # Color allowed are: [BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET].
         ),
         telegram=Telegram(                                                          # You can omit or set to None if you don't want to receive updates on Telegram
             chat_id=123456789,                                                      # Chat ID to send messages @getmyid_bot
             token="123456789:shfuihreuifheuifhiu34578347",                          # Telegram API token @BotFather
             events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE,
-                    Events.BET_LOSE, Events.CHAT_MENTION],                          # Only these events will be sent to the chat
+                    Events.CHAT_MENTION],                          # Only these events will be sent to the chat
             disable_notification=True,                                              # Revoke the notification (sound/vibration)
         ),
         discord=Discord(
             webhook_api="https://discord.com/api/webhooks/0123456789/0a1B2c3D4e5F6g7H8i9J",  # Discord Webhook URL
             events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE,
-                    Events.BET_LOSE, Events.CHAT_MENTION],                                  # Only these events will be sent to the chat
+                    Events.CHAT_MENTION],                                  # Only these events will be sent to the chat
         ),
         webhook=Webhook(
             endpoint="https://example.com/webhook",                                                                    # Webhook URL
             method="GET",                                                                   # GET or POST
             events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE,
-                    Events.BET_LOSE, Events.CHAT_MENTION],                                  # Only these events will be sent to the endpoint
+                    Events.CHAT_MENTION],                                  # Only these events will be sent to the endpoint
         ),
         matrix=Matrix(
             username="twitch_miner",                                                   # Matrix username (without homeserver)
             password="...",                                                            # Matrix password
             homeserver="matrix.org",                                                   # Matrix homeserver
             room_id="...",                                                             # Room ID
-            events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE, Events.BET_LOSE], # Only these events will be sent
+            events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE], # Only these events will be sent
         ),
         pushover=Pushover(
             userkey="YOUR-ACCOUNT-TOKEN",                                             # Login to https://pushover.net/, the user token is on the main page
@@ -78,32 +76,16 @@ twitch_miner = TwitchChannelPointsMiner(
             endpoint="https://example.com/message?token=TOKEN",
             priority=8,
             events=[Events.STREAMER_ONLINE, Events.STREAMER_OFFLINE,
-                    Events.BET_LOSE, Events.CHAT_MENTION], 
+                    Events.CHAT_MENTION], 
         )
     ),
     streamer_settings=StreamerSettings(
-        make_predictions=True,                  # If you want to Bet / Make prediction
         follow_raid=True,                       # Follow raid to obtain more points
         claim_drops=True,                       # We can't filter rewards base on stream. Set to False for skip viewing counter increase and you will never obtain a drop reward from this script. Issue #21
         claim_moments=True,                     # If set to True, https://help.twitch.tv/s/article/moments will be claimed when available
         watch_streak=True,                      # If a streamer go online change the priority of streamers array and catch the watch screak. Issue #11
         community_goals=False,                  # If True, contributes the max channel points per stream to the streamers' community challenge goals
         chat=ChatPresence.ONLINE,               # Join irc chat to increase watch-time [ALWAYS, NEVER, ONLINE, OFFLINE]
-        bet=BetSettings(
-            strategy=Strategy.SMART,            # Choose you strategy!
-            percentage=5,                       # Place the x% of your channel points
-            percentage_gap=20,                  # Gap difference between outcomesA and outcomesB (for SMART strategy)
-            max_points=50000,                   # If the x percentage of your channel points is gt bet_max_points set this value
-            stealth_mode=True,                  # If the calculated amount of channel points is GT the highest bet, place the highest value minus 1-2 points Issue #33
-            delay_mode=DelayMode.FROM_END,      # When placing a bet, we will wait until `delay` seconds before the end of the timer
-            delay=6,
-            minimum_points=20000,               # Place the bet only if we have at least 20k points. Issue #113
-            filter_condition=FilterCondition(
-                by=OutcomeKeys.TOTAL_USERS,     # Where apply the filter. Allowed [PERCENTAGE_USERS, ODDS_PERCENTAGE, ODDS, TOP_POINTS, TOTAL_USERS, TOTAL_POINTS]
-                where=Condition.LTE,            # 'by' must be [GT, LT, GTE, LTE] than value
-                value=800
-            )
-        )
     )
 )
 
@@ -112,18 +94,18 @@ twitch_miner = TwitchChannelPointsMiner(
 # The streamers array can be a String -> username or Streamer instance.
 
 # The settings priority are: settings in mine function, settings in TwitchChannelPointsMiner instance, default settings.
-# For example, if in the mine function you don't provide any value for 'make_prediction' but you have set it on TwitchChannelPointsMiner instance, the script will take the value from here.
+# For example, if in the mine function you don't provide any value for 'follow_raid' but you have set it on TwitchChannelPointsMiner instance, the script will take the value from here.
 # If you haven't set any value even in the instance the default one will be used
 
 #twitch_miner.analytics(host="127.0.0.1", port=5000, refresh=5, days_ago=7)   # Start the Analytics web-server
 
 twitch_miner.mine(
     [
-        Streamer("streamer-username01", settings=StreamerSettings(make_predictions=True  , follow_raid=False , claim_drops=True  , watch_streak=True , community_goals=False , bet=BetSettings(strategy=Strategy.SMART      , percentage=5 , stealth_mode=True,  percentage_gap=20 , max_points=234   , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_USERS,      where=Condition.LTE, value=800 ) ) )),
-        Streamer("streamer-username02", settings=StreamerSettings(make_predictions=False , follow_raid=True  , claim_drops=False ,                                             bet=BetSettings(strategy=Strategy.PERCENTAGE , percentage=5 , stealth_mode=False, percentage_gap=20 , max_points=1234  , filter_condition=FilterCondition(by=OutcomeKeys.TOTAL_POINTS,     where=Condition.GTE, value=250 ) ) )),
-        Streamer("streamer-username03", settings=StreamerSettings(make_predictions=True  , follow_raid=False ,                     watch_streak=True , community_goals=True  , bet=BetSettings(strategy=Strategy.SMART      , percentage=5 , stealth_mode=False, percentage_gap=30 , max_points=50000 , filter_condition=FilterCondition(by=OutcomeKeys.ODDS,             where=Condition.LT,  value=300 ) ) )),
-        Streamer("streamer-username04", settings=StreamerSettings(make_predictions=False , follow_raid=True  ,                     watch_streak=True ,                                                                                                                                                                                                                                                       )),
-        Streamer("streamer-username05", settings=StreamerSettings(make_predictions=True  , follow_raid=True  , claim_drops=True ,  watch_streak=True , community_goals=True  , bet=BetSettings(strategy=Strategy.HIGH_ODDS  , percentage=7 , stealth_mode=True,  percentage_gap=20 , max_points=90    , filter_condition=FilterCondition(by=OutcomeKeys.PERCENTAGE_USERS, where=Condition.GTE, value=300 ) ) )),
+        Streamer("streamer-username01", settings=StreamerSettings(follow_raid=False , claim_drops=True  , watch_streak=True , community_goals=False )),
+        Streamer("streamer-username02", settings=StreamerSettings(follow_raid=True  , claim_drops=False )),
+        Streamer("streamer-username03", settings=StreamerSettings(follow_raid=False ,                     watch_streak=True , community_goals=True  )),
+        Streamer("streamer-username04", settings=StreamerSettings(follow_raid=True  ,                     watch_streak=True ,                                                                                                                                                                                                                                                       )),
+        Streamer("streamer-username05", settings=StreamerSettings(follow_raid=True  , claim_drops=True ,  watch_streak=True , community_goals=True  )),
         Streamer("streamer-username06"),
         Streamer("streamer-username07"),
         Streamer("streamer-username08"),

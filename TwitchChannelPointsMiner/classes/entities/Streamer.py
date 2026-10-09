@@ -6,7 +6,6 @@ from datetime import datetime
 from threading import Lock
 
 from TwitchChannelPointsMiner.classes.Chat import ChatPresence, ThreadChat
-from TwitchChannelPointsMiner.classes.entities.Bet import BetSettings, DelayMode
 from TwitchChannelPointsMiner.classes.entities.Stream import Stream
 from TwitchChannelPointsMiner.classes.Settings import Events, Settings
 from TwitchChannelPointsMiner.constants import URL
@@ -17,39 +16,32 @@ logger = logging.getLogger(__name__)
 
 class StreamerSettings(object):
     __slots__ = [
-        "make_predictions",
         "follow_raid",
         "claim_drops",
         "claim_moments",
         "watch_streak",
         "community_goals",
-        "bet",
         "chat",
     ]
 
     def __init__(
         self,
-        make_predictions: bool = None,
         follow_raid: bool = None,
         claim_drops: bool = None,
         claim_moments: bool = None,
         watch_streak: bool = None,
         community_goals: bool = None,
-        bet: BetSettings = None,
         chat: ChatPresence = None,
     ):
-        self.make_predictions = make_predictions
         self.follow_raid = follow_raid
         self.claim_drops = claim_drops
         self.claim_moments = claim_moments
         self.watch_streak = watch_streak
         self.community_goals = community_goals
-        self.bet = bet
         self.chat = chat
 
     def default(self):
         for name in [
-            "make_predictions",
             "follow_raid",
             "claim_drops",
             "claim_moments",
@@ -59,13 +51,11 @@ class StreamerSettings(object):
                 setattr(self, name, True)
         if self.community_goals is None:
             self.community_goals = False
-        if self.bet is None:
-            self.bet = BetSettings()
         if self.chat is None:
             self.chat = ChatPresence.ONLINE
 
     def __repr__(self):
-        return f"BetSettings(make_predictions={self.make_predictions}, follow_raid={self.follow_raid}, claim_drops={self.claim_drops}, claim_moments={self.claim_moments}, watch_streak={self.watch_streak}, community_goals={self.community_goals}, bet={self.bet}, chat={self.chat})"
+        return f"StreamerSettings(follow_raid={self.follow_raid}, claim_drops={self.claim_drops}, claim_moments={self.claim_moments}, watch_streak={self.watch_streak}, community_goals={self.community_goals}, chat={self.chat})"
 
 
 class Streamer(object):
@@ -202,31 +192,11 @@ class Streamer(object):
             else 0
         )
 
-    def get_prediction_window(self, prediction_window_seconds):
-        delay_mode = self.settings.bet.delay_mode
-        delay = self.settings.bet.delay
-        if delay_mode == DelayMode.FROM_START:
-            return min(delay, prediction_window_seconds)
-        elif delay_mode == DelayMode.FROM_END:
-            return max(prediction_window_seconds - delay, 0)
-        elif delay_mode == DelayMode.PERCENTAGE:
-            return prediction_window_seconds * delay
-        else:
-            return prediction_window_seconds
-
     # === ANALYTICS === #
     def persistent_annotations(self, event_type, event_text):
         event_type = event_type.upper()
-        if event_type in ["WATCH_STREAK", "WIN", "PREDICTION_MADE", "LOSE"]:
-            primary_color = (
-                "#45c1ff"  # blue #45c1ff yellow #ffe045 green #36b535 red #ff4545
-                if event_type == "WATCH_STREAK"
-                else (
-                    "#ffe045"
-                    if event_type == "PREDICTION_MADE"
-                    else ("#36b535" if event_type == "WIN" else "#ff4545")
-                )
-            )
+        if event_type == "WATCH_STREAK":
+            primary_color = "#45c1ff"  # blue
             data = {
                 "borderColor": primary_color,
                 "label": {
