@@ -18,6 +18,7 @@ from TwitchChannelPointsMiner.classes.Settings import Events
 from TwitchChannelPointsMiner.classes.Telegram import Telegram
 from TwitchChannelPointsMiner.classes.Pushover import Pushover
 from TwitchChannelPointsMiner.classes.Gotify import Gotify
+from TwitchChannelPointsMiner.classes.LogBuffer import LOG_BUFFER
 from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import remove_emoji
 
@@ -309,6 +310,19 @@ def configure_loggers(username, settings):
         )
     )
 
+    # In-memory copy of the log for the analytics page. It goes first in the listener so it
+    # sees the record before the console formatter adds colours to it.
+    buffer_handler = LOG_BUFFER
+    buffer_handler.use_emoji = settings.emoji
+    buffer_handler.setLevel(settings.console_level)
+    buffer_handler.setFormatter(
+        FileFormatter(
+            fmt="%(asctime)s - %(levelname)s - [%(funcName)s]: %(message)s",
+            datefmt="%d/%m/%y %H:%M:%S",
+            settings=settings,
+        )
+    )
+
     if settings.save is True:
         logs_path = str(subdir("logs"))
         if settings.auto_clear is True:
@@ -344,13 +358,17 @@ def configure_loggers(username, settings):
 
         # Add logger handlers to the logger queue and start the process
         queue_listener = QueueListener(
-            logger_queue, file_handler, console_handler, respect_handler_level=True
+            logger_queue,
+            buffer_handler,
+            file_handler,
+            console_handler,
+            respect_handler_level=True,
         )
         queue_listener.start()
         return logs_file, queue_listener
     else:
         queue_listener = QueueListener(
-            logger_queue, console_handler, respect_handler_level=True
+            logger_queue, buffer_handler, console_handler, respect_handler_level=True
         )
         queue_listener.start()
         return None, queue_listener
