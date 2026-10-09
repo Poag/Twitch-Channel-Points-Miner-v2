@@ -227,6 +227,22 @@ def check_assets():
                 download_assets(assets_folder, required_files)
                 break
 
+def current_log_file(username):
+    """The file the miner is writing right now: the path it registered at startup, or else
+    the newest log of this user (named <username>.log, or <username>.<timestamp>.log
+    when TCPM_LOG_AUTO_CLEAR=false)."""
+    registered = getattr(Settings, "logs_file", None)
+    if registered:
+        return str(registered)
+    logs_dir = str(subdir("logs"))
+    candidates = [
+        os.path.join(logs_dir, f)
+        for f in os.listdir(logs_dir)
+        if f == f"{username}.log" or (f.startswith(f"{username}.") and f.endswith(".log"))
+    ]
+    return max(candidates, key=os.path.getmtime) if candidates else None
+
+
 # Log panel: first load shows this much of the end of the file, then at most this much per poll
 LOG_TAIL_BYTES = 64 * 1024
 LOG_CHUNK_BYTES = 256 * 1024
@@ -258,7 +274,13 @@ class AnalyticsServer(Thread):
             request (no offset) gets only the tail of the file, and a file that got smaller
             (daily rotation) is read again from the start.
             """
-            log_file_path = os.path.join(str(subdir("logs")), f"{username}.log")
+            log_file_path = current_log_file(username)
+            if log_file_path is None:
+                return Response(
+                    "No log file found. Logs are only written when TCPM_LOG_SAVE=true.",
+                    status=404,
+                    mimetype="text/plain",
+                )
             try:
                 offset = int(request.args.get("offset", -1))
             except ValueError:
@@ -279,8 +301,11 @@ class AnalyticsServer(Thread):
                     log_file.seek(offset)
                     chunk = log_file.read(LOG_CHUNK_BYTES)
             except FileNotFoundError:
-                return Response("", status=200, mimetype="text/plain",
-                                headers={"X-Log-Offset": "0"})
+                return Response(
+                    f"Log file not found yet: {log_file_path}",
+                    status=404,
+                    mimetype="text/plain",
+                )
 
             # Only hand out complete lines so a half written line (or a split emoji) isn't cut
             end = chunk.rfind(b"\n") + 1
