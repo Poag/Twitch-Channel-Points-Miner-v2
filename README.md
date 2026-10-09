@@ -9,7 +9,7 @@
 <p align="center">
 <a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=white&logo=github&logoColor=white"></a>
 <a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=limegreen&logo=github&logoColor=white"></a>
-<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/blob/master/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
+<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/blob/main/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
 <a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
 </p>
 
@@ -55,7 +55,7 @@ If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIB
 - A single data folder (`TCPM_DATA_DIR`) holding cookies, the drops database, logs and analytics, so Docker needs one volume
 - Each drop is claimed **once only**: attempts are stored in a small per-account database, so a failing claim is never retried and re-notified
 - Drops for a game whose account is **not connected** are skipped, with a warning once a day that includes a countdown to the end of the campaign
-- Multi-arch (`amd64` and `arm64`) images on GHCR, built on native runners, with `latest` on `master`, version tags and a monthly rebuild for security updates
+- Multi-arch (`amd64` and `arm64`) images on GHCR, built on native runners, with `latest` on `main`, version tags and a monthly rebuild for security updates
 - Lower idle CPU and memory use (no busy IRC loop, in-memory analytics writes, lazy pandas import, no needless drops polling)
 - Smaller image on a current base (Python 3.12 slim, no compilers needed)
 
@@ -165,7 +165,7 @@ python -m TwitchChannelPointsMiner
 If you don't set `TCPM_PASSWORD` the miner asks for it interactively on the first login.
 
 ### Docker
-Images are published to `ghcr.io/poag/twitch-channel-points-miner-v2` for `linux/amd64` and `linux/arm64` (`latest` follows `master` and is rebuilt monthly).
+Images are published to `ghcr.io/poag/twitch-channel-points-miner-v2` for `linux/amd64` and `linux/arm64` (`latest` follows `main` and is rebuilt monthly).
 
 **Example using docker-compose:**
 
