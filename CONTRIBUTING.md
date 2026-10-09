@@ -1,110 +1,74 @@
-# Contributing to this repository
+# Contributing to TwitchMiner
 
-## Getting started
+Thanks for helping out. TwitchMiner is a fork of Twitch Channel Points Miner v2 (see [Credits and license](README.md#credits-and-license)), and contributions are welcome: bug reports, fixes, documentation and new features.
 
-Before you begin:
-- Have you read the [code of conduct](CODE_OF_CONDUCT.md)?
-- Check out the [existing issues](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues) & see if there is already an opened issue.
+By contributing you agree that your changes are released under the project's license, the **GNU General Public License v3.0** (see [LICENSE](LICENSE)).
 
-### Ready to make a change? Fork the repo
+## Before you start
+- Look through the existing [issues](https://github.com/Poag/TwitchMiner/issues) and [pull requests](https://github.com/Poag/TwitchMiner/pulls) to see whether someone is already on it.
+- For anything bigger than a small fix, open an issue first to agree on the approach.
+- Keep changes focused: one fix or feature per pull request.
 
-Fork using GitHub Desktop:
-
-- [Getting started with GitHub Desktop](https://docs.github.com/en/desktop/installing-and-configuring-github-desktop/getting-started-with-github-desktop) will guide you through setting up Desktop.
-- Once Desktop is set up, you can use it to [fork the repo](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/cloning-and-forking-repositories-from-github-desktop)!
-
-Fork using the command line:
-
-- [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
-
-Fork with [GitHub Codespaces](https://github.com/features/codespaces):
-
-- [Fork, edit, and preview](https://docs.github.com/en/free-pro-team@latest/github/developing-online-with-codespaces/creating-a-codespace) using [GitHub Codespaces](https://github.com/features/codespaces) without having to install and run the project locally.
-
-### Open a pull request
-When you're done making changes, and you'd like to propose them for review, use the [pull request template](#pull-request-template) to open your PR (pull request).
-
-### Submit your PR & get it reviewed
-- Once you submit your PR, other users from the community will review it with you. The first thing you're going to want to do is a [self review](#self-review).
-- After that, we may have questions. Check back on your PR to keep up with the conversation.
-- Did you have an issue, like a merge conflict? Check out our [git tutorial](https://lab.github.com/githubtraining/managing-merge-conflicts) on resolving merge conflicts and other issues.
-
-### Your PR is merged!
-Congratulations! The whole GitHub community thanks you. :sparkles:
-
-Once your PR is merged, you will be proudly listed as a contributor in the [contributor chart](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/graphs/contributors).
-
-### Keep contributing as you use GitHub Docs
-
-Now that you're a part of the GitHub Docs community, you can keep participating in many ways.
-
-**Learn more about contributing:**
-
-- [Types of contributions :memo:](#types-of-contributions-memo)
-  - [:beetle: Issues](#beetle-issues)
-  - [:hammer_and_wrench: Pull requests](#hammer_and_wrench-pull-requests)
-- [Starting with an issue](#starting-with-an-issue)
-  - [Labels](#labels)
-- [Opening a pull request](#opening-a-pull-request)
-- [Reviewing](#reviewing)
-  - [Self review](#self-review)
-  - [Pull request template](#pull-request-template)
-  - [Python Styleguide](#python-styleguide)
-  - [Suggested changes](#suggested-changes)
-
-## Types of contributions :memo:
-You can contribute to the Twitch-Channel-Points-Miner-v2 in several ways. Bug reporting, pull request, propose new features, fork, donate, and much more :muscle: .
-
-### :beetle: Issues
-[Issues](https://docs.github.com/en/github/managing-your-work-on-github/about-issues) are used to report a bug, propose new features, or ask for help. When you open an issue, please use the appropriate template and label.
-
-### :hammer_and_wrench: Pull requests
-A [pull request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests) is a way to suggest changes in our repository.
-
-When we merge those changes, they should be deployed to the live site within 24 hours. :earth_africa: To learn more about opening a pull request in this repo, see [Opening a pull request](#opening-a-pull-request) below.
-
-## Starting with an issue
-You can browse existing issues to find something that needs help!
-
-### Labels
-Labels can help you find an issue you'd like to help with.
-- The `bug` label is used when something isn't working
-- The `documentation` label is used when you suggest improvements or additions to documentation (README.md update)
-- The `duplicate` label is used when this issue or pull request already exists
-- The `enhancement` label is used when you ask for / or propose a new feature or request
-- The `help wanted` is used when you need help with something
-- The `improvements` label is used when you would suggest improvements on already existing features
-- The `invalid` label is used for a non-valid issue
-- The `question` label is used for further information is requested
-- The `wontfix` label is used if we will not work on it
-
-## Opening a pull request
-You can use the GitHub user interface :pencil2: for minor changes, like fixing a typo or updating a readme. You can also fork the repo and then clone it locally to view changes and run your tests on your machine.
-
-### Self review
-You should always review your own PR first.
-
-For content changes, make sure that you:
-- [ ] Confirm that the changes address every part of the content design plan from your issue (if there are differences, explain them).
-- [ ] Review the content for technical accuracy.
-- [ ] Review the entire pull request using the checklist present in the template.
-- [ ] Copy-edit the changes for grammar, spelling, and adherence to the style guide.
-- [ ] Check new or updated Liquid statements to confirm that versioning is correct.
-- [ ] Check that all of your changes render correctly in staging. Remember, that lists and tables can be tricky.
-- [ ] If there are any failing checks in your PR, troubleshoot them until they're all passing.
-
-### Pull request template
-When you open a pull request, you must fill out the "Ready for review" template before we can review your PR. This template helps reviewers understand your changes and the purpose of your pull request.
-
-### Python Styleguide
-All Python code is formatted with [Black](https://github.com/psf/black) using the default settings. Your code will not be accepted if it is not blackened.
-You can use the pre-commit hook.
+## Project layout
 ```
-pip install pre-commit
-pre-commit install
+TwitchChannelPointsMiner/
+  __main__.py, config.py     start-up: builds the miner from TCPM_* environment variables
+  paths.py                   the single data folder (TCPM_DATA_DIR) and its subfolders
+  TwitchChannelPointsMiner.py  the miner (sessions, websockets, drops/minute-watched threads)
+  classes/                   Twitch API client, websockets, notifiers, analytics server, drops database
+  classes/entities/          Streamer, Stream, Drop, Campaign, ...
+assets/                      analytics web page (charts.html, style.css, script.js) and icon
+compose.yaml, Dockerfile     container build and example stack
+.env.example                 every setting with its default
 ```
+Configuration is **environment variables only** (prefix `TCPM_`). If you add or change a setting, update `config.py`, `.env.example` and the README settings tables together. Everything the miner writes goes under `TCPM_DATA_DIR` (`cookies/`, `database/`, `logs/`, `analytics/`); use `paths.subdir()` instead of building paths yourself.
 
-### Suggested changes
-We may ask for changes to be made before a PR can be merged, either using [suggested changes](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request) or pull request comments. You can apply suggested changes directly through the UI. You can make any other changes in your fork, then commit them to your branch.
+## Development setup
+1. Fork the repository and clone your fork.
+2. Create a virtualenv and install the requirements (Python 3.12 is what the Docker image uses):
+   ```sh
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. Configure and run it:
+   ```sh
+   cp .env.example .env      # set TCPM_USERNAME and TCPM_STREAMERS at least
+   set -a; . ./.env; set +a
+   python -m TwitchChannelPointsMiner
+   ```
+   Use a throw-away data folder while developing, for example `export TCPM_DATA_DIR=/tmp/tcpm-dev`, so you don't touch a real login.
+4. To work on the analytics page, set `TCPM_ENABLE_ANALYTICS=true` and open <http://127.0.0.1:5000/>. The assets in `assets/` are served as they are, so reload the browser (Flask caches the HTML template, so restart the miner after editing `charts.html`).
 
-As you update your PR and apply changes, mark each conversation as [resolved](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/commenting-on-a-pull-request#resolving-conversations).
+### Docker
+```sh
+docker build -t twitchminer .
+docker run -it --env-file .env -v $(pwd)/data:/data -p 5000:5000 twitchminer
+```
+Images are built and published by [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) on every push to `main` (`amd64` and `arm64`, rebuilt monthly). The Dockerfile has no compilers: if you add a dependency, make sure it ships wheels for both architectures.
+
+## Code style and checks
+- Formatting and linting are set up with [pre-commit](https://pre-commit.com/) (`isort`, `black`, `flake8`, trailing whitespace). Run it on the files you change:
+  ```sh
+  pip install pre-commit
+  pre-commit install
+  ```
+- There is no automated test suite yet. Before opening a pull request, at least:
+  - `python -m py_compile` the Python files you changed, and start the miner against your own account to exercise the code path you touched;
+  - for settings, check that bad values stop start-up with a clear message (see `config.py`);
+  - for the analytics page, check light and dark mode and that it still works with no data.
+- Tests for new logic are very welcome.
+- Don't commit secrets, cookies, logs or anything from a data folder (`data/` and `.env` are gitignored).
+
+## Pull requests
+1. Create a branch from `main` in your fork.
+2. Commit with clear messages that say what changed and why.
+3. Open the pull request against `main` and fill in the [pull request template](.github/PULL_REQUEST_TEMPLATE.md): what changed, how you tested it, and whether it breaks existing setups.
+4. Review your own diff first, and update the README and `.env.example` if behaviour or settings changed.
+5. Expect review comments. Push follow-up commits to the same branch, and resolve conversations as you address them.
+
+## Reporting bugs
+Open an issue using the bug report template. Please include the version (shown on the first log line), how you run it (Docker, compose, Unraid, plain Python), the relevant log lines, and your `TCPM_*` settings **without passwords or tokens**.
+
+## Questions about Twitch behaviour
+The miner uses Twitch's unofficial web endpoints, which change without notice. If something that used to work stops (a drop, a bonus, a whole feature), say what you saw in the logs; removing support for features Twitch has retired is a welcome contribution.
