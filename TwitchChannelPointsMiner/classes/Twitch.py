@@ -869,7 +869,9 @@ class Twitch(object):
             return False
         claimed = self.claim_drop(drop)
         # A failed claim is also stored: we don't try the same drop again
-        self.drops_db.record_attempt(drop.id, drop.name, game, claimed)
+        self.drops_db.record_attempt(
+            drop.id, drop.name, game, claimed, benefit=drop.benefit
+        )
         return claimed
 
     def __warn_account_not_connected(self, game, end_at):

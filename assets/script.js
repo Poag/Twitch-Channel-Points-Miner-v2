@@ -106,7 +106,7 @@ $(document).ready(function () {
     var autoUpdateLog = true;
 
     // Variable to keep track of the last received log index
-    var lastReceivedLogIndex = 0;
+    var lastReceivedLogIndex = -1;
 
     $('#auto-update-log').click(() => {
         autoUpdateLog = !autoUpdateLog;
@@ -117,24 +117,33 @@ $(document).ready(function () {
         }
     });
 
-    // Function to get the full log content
+    // Poll the log endpoint. The server tells us the byte offset to continue from.
+    var logTimer = null;
     function getLog() {
-        if (isLogCheckboxChecked) {
-            $.get(`/log?lastIndex=${lastReceivedLogIndex}`, function (data) {
-                // Process and display the new log entries received
-                $("#log-content").append(data);
-                // Scroll to the bottom of the log content
-                $("#log-content").scrollTop($("#log-content")[0].scrollHeight);
-
-                // Update the last received log index
-                lastReceivedLogIndex += data.length;
-
-                if (autoUpdateLog) {
-                    // Call getLog() again after a certain interval (e.g., 1 second)
-                    setTimeout(getLog, 1000);
-                }
-            });
-        }
+        clearTimeout(logTimer);
+        if (!isLogCheckboxChecked) return;
+        $.ajax({
+            url: '/log',
+            data: { offset: lastReceivedLogIndex },
+            dataType: 'text',
+            cache: false
+        }).done(function (data, status, xhr) {
+            if (lastReceivedLogIndex === -1) $("#log-content").text('');  // drop the placeholder text
+            var next = parseInt(xhr.getResponseHeader('X-Log-Offset'));
+            if (!isNaN(next)) {
+                if (next < lastReceivedLogIndex) $("#log-content").text('');  // log file was rotated
+                lastReceivedLogIndex = next;
+            }
+            if (data) {
+                var box = $("#log-content")[0];
+                var atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+                $("#log-content").append(document.createTextNode(data));
+                if (atBottom) $("#log-content").scrollTop(box.scrollHeight);
+            }
+        }).always(function () {
+            // Keep polling after errors too, so a restart of the miner doesn't stop the log
+            if (isLogCheckboxChecked && autoUpdateLog) logTimer = setTimeout(getLog, 1000);
+        });
     }
 
     chart.render();
@@ -173,6 +182,8 @@ $(document).ready(function () {
         changeSortBy($(this).val());
     });
     getStreamers();
+    loadDrops();
+    setInterval(loadDrops, 60000);
 
     updateAnnotations();
     toggleDarkMode();
@@ -206,6 +217,29 @@ $(document).ready(function () {
         }
     });
 });
+
+function loadDrops() {
+    $.getJSON('./drops', function (drops) {
+        var body = $('#drops-body').empty();
+        var claimed = drops.filter(function (d) { return d.claimed; }).length;
+        $('#drops-count').text(drops.length ? '(' + claimed + ' claimed' + (drops.length > claimed ? ', ' + (drops.length - claimed) + ' failed' : '') + ')' : '');
+        if (!drops.length) {
+            body.append($('<tr>').append($('<td colspan="4" class="empty">').text('No drops claimed yet. Claims appear here once the miner receives a drop.')));
+            return;
+        }
+        drops.forEach(function (d) {
+            var label = d.benefit && d.benefit !== d.name ? d.name + ' (' + d.benefit + ')' : d.name;
+            var status = $('<span class="badge">').addClass(d.claimed ? 'ok' : 'fail').text(d.claimed ? 'Claimed' : 'Failed');
+            body.append($('<tr>')
+                .append($('<td class="when">').text(new Date(d.at).toLocaleString()))
+                .append($('<td>').text(label))
+                .append($('<td>').text(d.game || ''))
+                .append($('<td>').append(status)));
+        });
+    }).fail(function () {
+        $('#drops-body').empty().append($('<tr>').append($('<td colspan="4" class="empty">').text('Could not load drops.')));
+    });
+}
 
 function formatDate(date) {
     var d = new Date(date),

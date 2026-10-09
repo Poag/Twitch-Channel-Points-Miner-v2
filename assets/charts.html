@@ -88,6 +88,20 @@
             </div>
         </section>
 
+        <section class="card drops-card">
+            <h2>Drops <span id="drops-count" class="count"></span></h2>
+            <div class="table-wrap">
+                <table id="drops-table">
+                    <thead>
+                        <tr><th>When</th><th>Drop</th><th>Game</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="drops-body">
+                        <tr><td colspan="4" class="empty">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <section class="card log-card" id="log-box" style="display: none;">
             <h2>Log</h2>
             <pre id="log-content">Set TCPM_LOG_SAVE=true to save logs to a file that can be shown here.&#10;&#13;</pre>

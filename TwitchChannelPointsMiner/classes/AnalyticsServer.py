@@ -8,6 +8,7 @@ from threading import Thread
 from flask import Flask, Response, cli, render_template, request
 
 from TwitchChannelPointsMiner.classes.Settings import Settings
+from TwitchChannelPointsMiner.classes.DropsDB import DropsDB
 from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import download_file
 
@@ -226,7 +227,9 @@ def check_assets():
                 download_assets(assets_folder, required_files)
                 break
 
-last_sent_log_index = 0
+# Log panel: first load shows this much of the end of the file, then at most this much per poll
+LOG_TAIL_BYTES = 64 * 1024
+LOG_CHUNK_BYTES = 256 * 1024
 
 class AnalyticsServer(Thread):
     def __init__(
@@ -248,25 +251,46 @@ class AnalyticsServer(Thread):
         self.username = username
 
         def generate_log():
-            global last_sent_log_index  # Use the global variable
+            """Return the log text after the byte `offset` the client already has.
 
-            # Get the last received log index from the client request parameters
-            last_received_index = int(request.args.get("lastIndex", last_sent_log_index))
-
-            logs_path = str(subdir("logs"))
-            log_file_path = os.path.join(logs_path, f"{username}.log")
+            The new offset is sent back in the X-Log-Offset header. Offsets are bytes (not
+            characters), so emojis can't make the client and server drift apart. A first
+            request (no offset) gets only the tail of the file, and a file that got smaller
+            (daily rotation) is read again from the start.
+            """
+            log_file_path = os.path.join(str(subdir("logs")), f"{username}.log")
             try:
-                with open(log_file_path, "r", encoding="utf-8") as log_file:
-                    log_content = log_file.read()
-
-                # Extract new log entries since the last received index
-                new_log_entries = log_content[last_received_index:]
-                last_sent_log_index = len(log_content)  # Update the last sent index
-
-                return Response(new_log_entries, status=200, mimetype="text/plain")
-
+                offset = int(request.args.get("offset", -1))
+            except ValueError:
+                offset = -1
+            try:
+                size = os.path.getsize(log_file_path)
+                with open(log_file_path, "rb") as log_file:
+                    if offset < 0:
+                        # First load: only the last part, starting on a whole line
+                        offset = max(0, size - LOG_TAIL_BYTES)
+                        if offset > 0:
+                            log_file.seek(offset - 1)
+                            if log_file.read(1) != b"\n":
+                                log_file.readline()
+                                offset = log_file.tell()
+                    elif offset > size:
+                        offset = 0  # rotated or truncated
+                    log_file.seek(offset)
+                    chunk = log_file.read(LOG_CHUNK_BYTES)
             except FileNotFoundError:
-                return Response("Log file not found.", status=404, mimetype="text/plain")
+                return Response("", status=200, mimetype="text/plain",
+                                headers={"X-Log-Offset": "0"})
+
+            # Only hand out complete lines so a half written line (or a split emoji) isn't cut
+            end = chunk.rfind(b"\n") + 1
+            chunk = chunk[:end]
+            return Response(
+                chunk.decode("utf-8", errors="replace"),
+                status=200,
+                mimetype="text/plain",
+                headers={"X-Log-Offset": str(offset + end)},
+            )
 
         self.app = Flask(
             __name__,
@@ -289,6 +313,19 @@ class AnalyticsServer(Thread):
                               json_all, methods=["GET"])
         self.app.add_url_rule(
             "/log", "log", generate_log, methods=["GET"])
+
+        drops_db_path = os.path.join(
+            str(subdir("database")), f"{username}_drops.db"
+        )
+
+        def drops_log():
+            return Response(
+                json.dumps(DropsDB(drops_db_path).recent()),
+                status=200,
+                mimetype="application/json",
+            )
+
+        self.app.add_url_rule("/drops", "drops", drops_log, methods=["GET"])
 
     def run(self):
         logger.info(
