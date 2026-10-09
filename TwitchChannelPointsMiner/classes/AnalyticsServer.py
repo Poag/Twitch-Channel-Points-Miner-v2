@@ -209,11 +209,11 @@ def download_assets(assets_folder, required_files):
 
 def check_assets():
     required_files = [
-        "banner.png",
         "charts.html",
         "script.js",
         "style.css",
-        "dark-theme.css",
+        "icon.png",
+        "icon.svg",
     ]
     assets_folder = os.path.join(Path().absolute(), "assets")
     if os.path.isdir(assets_folder) is False:

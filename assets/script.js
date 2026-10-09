@@ -1,17 +1,24 @@
 // https://apexcharts.com/javascript-chart-demos/line-charts/zoomable-timeseries/
+var isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
 var options = {
     series: [],
     chart: {
         type: 'area',
         stacked: false,
-        height: 490,
+        height: 520,
         zoom: {
             type: 'x',
             enabled: true,
             autoScaleYaxis: true
         },
         // background: '#2B2D3E',
-        foreColor: '#fff'
+        foreColor: isDarkTheme ? '#e5e7eb' : '#374151',
+        toolbar: {
+            autoSelected: 'zoom'
+        },
+        animations: {
+            enabled: false
+        }
     },
     dataLabels: {
         enabled: false
@@ -26,7 +33,7 @@ var options = {
         text: 'Channel points (dates are displayed in UTC)',
         align: 'left'
     },
-    colors: ["#f9826c"],
+    colors: [isDarkTheme ? "#a78bfa" : "#6d28d9"],
     fill: {
         type: 'gradient',
         gradient: {
@@ -49,7 +56,7 @@ var options = {
         }
     },
     tooltip: {
-        theme: 'dark',
+        theme: isDarkTheme ? 'dark' : 'light',
         shared: false,
         x: {
             show: true,
@@ -130,35 +137,10 @@ $(document).ready(function () {
         }
     }
 
-    // Retrieve the saved header visibility preference from localStorage
-    var headerVisibility = localStorage.getItem('headerVisibility');
-
-    // Set the initial header visibility based on the saved preference or default to 'visible'
-    if (headerVisibility === 'hidden') {
-        $('#toggle-header').prop('checked', false);
-        $('#header').hide();
-    } else {
-        $('#toggle-header').prop('checked', true);
-        $('#header').show();
-    }
-
-    // Handle the toggle header change event
-    $('#toggle-header').change(function () {
-        if (this.checked) {
-            $('#header').show();
-            // Save the header visibility preference as 'visible' in localStorage
-            localStorage.setItem('headerVisibility', 'visible');
-        } else {
-            $('#header').hide();
-            // Save the header visibility preference as 'hidden' in localStorage
-            localStorage.setItem('headerVisibility', 'hidden');
-        }
-    });
-
     chart.render();
 
     if (!localStorage.getItem("annotations")) localStorage.setItem("annotations", true);
-    if (!localStorage.getItem("dark-mode")) localStorage.setItem("dark-mode", true);
+    if (!localStorage.getItem("dark-mode")) localStorage.setItem("dark-mode", window.matchMedia("(prefers-color-scheme: dark)").matches);
     if (!localStorage.getItem("sort-by")) localStorage.setItem("sort-by", "Name ascending");
 
     // Restore settings from localStorage on page load
@@ -186,7 +168,10 @@ $(document).ready(function () {
     if (sortBy.includes("Points")) sortField = 'points';
     else if (sortBy.includes("Last activity")) sortField = 'last_activity';
     else sortField = 'name';
-    $('#sorting-by').text(sortBy);
+    $('#sort-select').val(sortBy);
+    $('#sort-select').change(function () {
+        changeSortBy($(this).val());
+    });
     getStreamers();
 
     updateAnnotations();
@@ -235,8 +220,8 @@ function formatDate(date) {
 }
 
 function changeStreamer(streamer, index) {
-    $("li").removeClass("is-active")
-    $("li").eq(index - 1).addClass('is-active');
+    $("#streamers-list li").removeClass("is-active")
+    $("#streamers-list li").eq(index - 1).addClass('is-active');
     currentStreamer = streamer;
 
     // Update the chart title with the current streamer's name
@@ -305,8 +290,8 @@ function renderStreamers() {
     var promised = new Promise((resolve, reject) => {
         streamersList.forEach((streamer, index, array) => {
             displayname = streamer.name.replace(".json", "");
-            if (sortField == 'points') displayname = "<font size='-2'>" + streamer['points'] + "</font>&nbsp;" + displayname;
-            else if (sortField == 'last_activity') displayname = "<font size='-2'>" + formatDate(streamer['last_activity']) + "</font>&nbsp;" + displayname;
+            if (sortField == 'points') displayname = displayname + "<span class='meta'>" + streamer['points'] + "</span>";
+            else if (sortField == 'last_activity') displayname = displayname + "<span class='meta'>" + formatDate(streamer['last_activity']) + "</span>";
             var isActive = currentStreamer === streamer.name;
             if (!isActive && localStorage.getItem("selectedStreamer") === null && index === 0) {
                 isActive = true;
@@ -336,14 +321,13 @@ function sortStreamers() {
     });
 }
 
-function changeSortBy(option) {
-    sortBy = option.innerText.trim();
+function changeSortBy(value) {
+    sortBy = value;
     if (sortBy.includes("Points")) sortField = 'points'
     else if (sortBy.includes("Last activity")) sortField = 'last_activity'
     else sortField = 'name';
     sortStreamers();
     renderStreamers();
-    $('#sorting-by').text(sortBy);
     localStorage.setItem("sort-by", sortBy);
 }
 
@@ -365,18 +349,6 @@ function clearAnnotations() {
         })
     chart.clearAnnotations();
 }
-
-// Toggle
-$('#annotations').click(() => {
-    updateAnnotations();
-});
-$('#dark-mode').click(() => {
-    toggleDarkMode();
-});
-
-$('.dropdown').click(() => {
-    $('.dropdown').toggleClass('is-active');
-});
 
 // Input date
 $('#startDate').change(() => {
