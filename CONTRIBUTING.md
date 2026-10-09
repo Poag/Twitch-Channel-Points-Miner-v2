@@ -24,6 +24,8 @@ compose.yaml, Dockerfile     container build and example stack
 Configuration is **environment variables only** (prefix `TCPM_`). If you add or change a setting, update `config.py`, `.env.example` and the README settings tables together. Everything the miner writes goes under `TCPM_DATA_DIR` (`cookies/`, `database/`, `logs/`, `analytics/`); use `paths.subdir()` instead of building paths yourself.
 
 ## Development setup
+TwitchMiner is only supported as a Docker container. Running it from source below is for development; please reproduce bugs in Docker before reporting them.
+
 1. Fork the repository and clone your fork.
 2. Create a virtualenv and install the requirements (Python 3.12 is what the Docker image uses):
    ```sh
