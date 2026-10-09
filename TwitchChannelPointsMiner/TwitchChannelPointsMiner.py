@@ -22,6 +22,7 @@ from TwitchChannelPointsMiner.classes.Settings import FollowersOrder, Priority, 
 from TwitchChannelPointsMiner.classes.Twitch import Twitch
 from TwitchChannelPointsMiner.classes.WebSocketsPool import WebSocketsPool
 from TwitchChannelPointsMiner.logger import LoggerSettings, configure_loggers
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import (
     _millify,
     at_least_one_value_in_settings_is,
@@ -87,7 +88,7 @@ class TwitchChannelPointsMiner:
     ):
         # Fixes TypeError: 'NoneType' object is not subscriptable
         if not username or username == "your-twitch-username":
-            logger.error("Please edit your runner file (usually run.py) and try again.")
+            logger.error("Please set TCPM_USERNAME (or pass your username to the constructor) and try again.")
             logger.error("No username, exiting...")
             sys.exit(0)
 
@@ -119,10 +120,7 @@ class TwitchChannelPointsMiner:
         Settings.enable_analytics = enable_analytics
 
         if enable_analytics is True:
-            Settings.analytics_path = os.path.join(
-                Path().absolute(), "analytics", username
-            )
-            Path(Settings.analytics_path).mkdir(parents=True, exist_ok=True)
+            Settings.analytics_path = str(subdir("analytics", username))
 
         self.username = username
 

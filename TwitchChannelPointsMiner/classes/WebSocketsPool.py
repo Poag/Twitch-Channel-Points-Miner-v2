@@ -8,6 +8,7 @@ from threading import Thread
 
 from dateutil import parser
 
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.classes.entities.CommunityGoal import CommunityGoal
 from TwitchChannelPointsMiner.classes.entities.Message import Message
 from TwitchChannelPointsMiner.classes.entities.Raid import Raid
@@ -286,7 +287,7 @@ class WebSocketsPool:
             if "ERR_BADAUTH" in error_message:
                 # Inform the user about the potential outdated cookie file
                 username = ws.twitch.twitch_login.username
-                logger.error(f"Received the ERR_BADAUTH error, most likely you have an outdated cookie file \"cookies\\{username}.pkl\". Delete this file and try again.")
+                logger.error(f"Received the ERR_BADAUTH error, most likely you have an outdated cookie file \"{subdir('cookies') / (username + '.pkl')}\". Delete this file and try again.")
                 # Attempt to delete the outdated cookie file
                 # try:
                 #     cookie_file_path = os.path.join("cookies", f"{username}.pkl")

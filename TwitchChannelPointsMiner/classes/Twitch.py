@@ -27,6 +27,7 @@ from TwitchChannelPointsMiner.classes.entities.Campaign import Campaign, parse_d
 from TwitchChannelPointsMiner.classes.entities.CommunityGoal import CommunityGoal
 from TwitchChannelPointsMiner.classes.entities.Drop import Drop
 from TwitchChannelPointsMiner.classes.DropsDB import DropsDB
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.classes.Exceptions import (
     StreamerDoesNotExistException,
     StreamerIsOfflineException,
@@ -70,10 +71,10 @@ class Twitch(object):
     ]
 
     def __init__(self, username, user_agent, password=None):
-        cookies_path = os.path.join(Path().absolute(), "cookies")
-        Path(cookies_path).mkdir(parents=True, exist_ok=True)
-        self.cookies_file = os.path.join(cookies_path, f"{username}.pkl")
-        self.drops_db = DropsDB(os.path.join(cookies_path, f"{username}_drops.db"))
+        self.cookies_file = os.path.join(subdir("cookies"), f"{username}.pkl")
+        self.drops_db = DropsDB(
+            os.path.join(subdir("database"), f"{username}_drops.db")
+        )
         self.user_agent = user_agent
         self.device_id = "".join(
             choice(string.ascii_letters + string.digits) for _ in range(32)

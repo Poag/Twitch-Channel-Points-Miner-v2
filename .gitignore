@@ -146,6 +146,7 @@ chromedriver*
 
 # Folders
 cookies/*
+data/
 logs/*
 screenshots/*
 htmls/*
