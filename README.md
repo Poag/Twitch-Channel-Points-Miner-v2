@@ -282,7 +282,7 @@ If you want you can toggle the dark theme with the dedicated checkbox.
 | ----------- | ---------- |
 | ![Light theme](assets/chart-analytics-light.png) | ![Dark theme](assets/chart-analytics-dark.png) |
 
-Below the chart, a **Drops** table lists every drop the miner tried to claim (time, drop, game, claimed or failed), and the optional **Log** panel shows the current session's log live (at the console log level, from memory, so it works even with `TCPM_LOG_SAVE=false`). To use this feature set `TCPM_ENABLE_ANALYTICS=true`. Read more at: [#96](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/96)
+In the streamer list, the (up to two) streamers the miner is watching right now have a green border; the one you clicked is filled. Below the chart, a **Drops** table lists every drop the miner tried to claim (time, drop, game, claimed or failed), and the optional **Log** panel shows the current session's log live (at the console log level, from memory, so it works even with `TCPM_LOG_SAVE=false`). To use this feature set `TCPM_ENABLE_ANALYTICS=true`. Read more at: [#96](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/96)
 
 | Variable | Default | Description |
 |---|---|---|
