@@ -151,6 +151,8 @@ class TwitchChannelPointsMiner:
         self.logs_file, self.queue_listener = configure_loggers(
             self.username, logger_settings
         )
+        # The analytics Log panel follows exactly the file we write (None when logs aren't saved)
+        Settings.logs_file = self.logs_file
 
         # Check for the latest version of the script
         current_version, github_version = check_versions()

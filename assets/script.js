@@ -140,6 +140,9 @@ $(document).ready(function () {
                 $("#log-content").append(document.createTextNode(data));
                 if (atBottom) $("#log-content").scrollTop(box.scrollHeight);
             }
+        }).fail(function (xhr) {
+            // e.g. logs not saved, or the file isn't there yet: say so instead of staying blank
+            if (lastReceivedLogIndex === -1 && xhr.responseText) $("#log-content").text(xhr.responseText);
         }).always(function () {
             // Keep polling after errors too, so a restart of the miner doesn't stop the log
             if (isLogCheckboxChecked && autoUpdateLog) logTimer = setTimeout(getLog, 1000);
