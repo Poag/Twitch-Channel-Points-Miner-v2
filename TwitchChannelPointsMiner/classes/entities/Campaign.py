@@ -18,6 +18,7 @@ class Campaign(object):
         "name",
         "status",
         "in_inventory",
+        "is_account_connected",
         "end_at",
         "start_at",
         "dt_match",
@@ -36,6 +37,8 @@ class Campaign(object):
             else list(map(lambda x: x["id"], dict["allow"]["channels"]))
         )
         self.in_inventory = False
+        # None when unknown. Only an explicit False means the game account is not linked
+        self.is_account_connected = (dict.get("self") or {}).get("isAccountConnected")
 
         self.end_at = parse_datetime(dict["endAt"])
         self.start_at = parse_datetime(dict["startAt"])
@@ -76,6 +79,12 @@ class Campaign(object):
                     self.drops[i].update(drop["self"])
                     # If after update we all conditions are meet we can claim the drop
                     if self.drops[i].is_claimable is True:
-                        claimed = callback(self.drops[i])
+                        claimed = callback(
+                            self.drops[i],
+                            self.id,
+                            self.game["displayName"],
+                            self.is_account_connected,
+                            self.end_at,
+                        )
                         self.drops[i].is_claimed = claimed
                     break
