@@ -292,6 +292,11 @@ p {
     font-weight: 600;
 }
 
+/* The streamers we are watching right now (selected = filled, watching = green border) */
+#streamers-list li.is-watching a {
+    box-shadow: inset 0 0 0 2px #22c55e;
+}
+
 #streamers-list .meta {
     order: 2;
     font-size: 12px;

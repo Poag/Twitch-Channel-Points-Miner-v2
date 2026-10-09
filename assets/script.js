@@ -188,6 +188,8 @@ $(document).ready(function () {
     getStreamers();
     loadDrops();
     setInterval(loadDrops, 60000);
+    loadWatching();
+    setInterval(loadWatching, 15000);
 
     updateAnnotations();
     toggleDarkMode();
@@ -221,6 +223,23 @@ $(document).ready(function () {
         }
     });
 });
+
+var watching = [];
+
+function applyWatching() {
+    $("#streamers-list li").each(function () {
+        var isWatching = watching.indexOf($(this).data("user")) !== -1;
+        $(this).toggleClass("is-watching", isWatching);
+        $(this).attr("title", isWatching ? "Currently watching" : "");
+    });
+}
+
+function loadWatching() {
+    $.getJSON('./watching', function (response) {
+        watching = response;
+        applyWatching();
+    });
+}
 
 function loadDrops() {
     $.getJSON('./drops', function (drops) {
@@ -336,7 +355,7 @@ function renderStreamers() {
                 currentStreamer = streamer.name;
             }
             var activeClass = isActive ? 'is-active' : '';
-            var listItem = `<li id="streamer-${streamer.name}" class="${activeClass}"><a onClick="changeStreamer('${streamer.name}', ${index + 1}); return false;">${displayname}</a></li>`;
+            var listItem = `<li id="streamer-${streamer.name}" data-user="${streamer.name.replace(".json", "")}" class="${activeClass}"><a onClick="changeStreamer('${streamer.name}', ${index + 1}); return false;">${displayname}</a></li>`;
             $("#streamers-list").append(listItem);
             if (isActive) {
                 // Scroll the selected streamer into view
@@ -349,6 +368,7 @@ function renderStreamers() {
         });
     });
     promised.then(() => {
+        applyWatching();
         changeStreamer(currentStreamer, streamersList.findIndex(streamer => streamer.name === currentStreamer) + 1);
     });
 }

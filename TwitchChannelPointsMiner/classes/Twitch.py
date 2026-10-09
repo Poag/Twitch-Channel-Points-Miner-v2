@@ -484,6 +484,8 @@ class Twitch(object):
                         streamers_watching.update(streamers_with_multiplier[:remaining_watch_amount()])
 
                 streamers_watching = list(streamers_watching)[:max_watch_amount]
+                # Shown on the analytics page
+                Settings.watching = [streamers[i].username for i in streamers_watching]
 
                 for index in streamers_watching:
                     # next_iteration = time.time() + 60 / len(streamers_watching)

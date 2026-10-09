@@ -299,6 +299,16 @@ class AnalyticsServer(Thread):
 
         self.app.add_url_rule("/drops", "drops", drops_log, methods=["GET"])
 
+        def watching():
+            # Streamers the miner is sending minute-watched events for right now (max 2)
+            return Response(
+                json.dumps(list(getattr(Settings, "watching", []))),
+                status=200,
+                mimetype="application/json",
+            )
+
+        self.app.add_url_rule("/watching", "watching", watching, methods=["GET"])
+
     def run(self):
         logger.info(
             f"Analytics running on http://{self.host}:{self.port}/",
