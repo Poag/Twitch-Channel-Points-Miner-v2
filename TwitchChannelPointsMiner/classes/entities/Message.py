@@ -46,24 +46,12 @@ class Message(object):
         )
 
     def __get_channel_id(self):
-        return (
-            self.topic_user
-            if self.data is None
-            else (
-                self.data["prediction"]["channel_id"]
-                if "prediction" in self.data
-                else (
-                    self.data["claim"]["channel_id"]
-                    if "claim" in self.data
-                    else (
-                        self.data["channel_id"]
-                        if "channel_id" in self.data
-                        else (
-                            self.data["balance"]["channel_id"]
-                            if "balance" in self.data
-                            else self.topic_user
-                        )
-                    )
-                )
-            )
-        )
+        if self.data is None:
+            return self.topic_user
+        if "claim" in self.data:
+            return self.data["claim"]["channel_id"]
+        if "channel_id" in self.data:
+            return self.data["channel_id"]
+        if "balance" in self.data:
+            return self.data["balance"]["channel_id"]
+        return self.topic_user

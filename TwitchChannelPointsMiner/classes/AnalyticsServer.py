@@ -8,6 +8,7 @@ from threading import Thread
 from flask import Flask, Response, cli, render_template, request
 
 from TwitchChannelPointsMiner.classes.Settings import Settings
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import download_file
 
 cli.show_server_banner = lambda *_: None
@@ -252,7 +253,7 @@ class AnalyticsServer(Thread):
             # Get the last received log index from the client request parameters
             last_received_index = int(request.args.get("lastIndex", last_sent_log_index))
 
-            logs_path = os.path.join(Path().absolute(), "logs")
+            logs_path = str(subdir("logs"))
             log_file_path = os.path.join(logs_path, f"{username}.log")
             try:
                 with open(log_file_path, "r", encoding="utf-8") as log_file:

@@ -27,6 +27,7 @@ from TwitchChannelPointsMiner.classes.entities.Campaign import Campaign, parse_d
 from TwitchChannelPointsMiner.classes.entities.CommunityGoal import CommunityGoal
 from TwitchChannelPointsMiner.classes.entities.Drop import Drop
 from TwitchChannelPointsMiner.classes.DropsDB import DropsDB
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.classes.Exceptions import (
     StreamerDoesNotExistException,
     StreamerIsOfflineException,
@@ -70,10 +71,10 @@ class Twitch(object):
     ]
 
     def __init__(self, username, user_agent, password=None):
-        cookies_path = os.path.join(Path().absolute(), "cookies")
-        Path(cookies_path).mkdir(parents=True, exist_ok=True)
-        self.cookies_file = os.path.join(cookies_path, f"{username}.pkl")
-        self.drops_db = DropsDB(os.path.join(cookies_path, f"{username}_drops.db"))
+        self.cookies_file = os.path.join(subdir("cookies"), f"{username}.pkl")
+        self.drops_db = DropsDB(
+            os.path.join(subdir("database"), f"{username}_drops.db")
+        )
         self.user_agent = user_agent
         self.device_id = "".join(
             choice(string.ascii_letters + string.digits) for _ in range(32)
@@ -670,7 +671,7 @@ class Twitch(object):
                 logger.error(
                     "Exception raised in send minute watched", exc_info=True)
 
-    # === CHANNEL POINTS / PREDICTION === #
+    # === CHANNEL POINTS === #
     # Load the amount of current points for a channel, check if a bonus is available
     def load_channel_points_context(self, streamer):
         json_data = copy.deepcopy(GQLOperations.ChannelPointsContext)
@@ -703,86 +704,6 @@ class Twitch(object):
 
             if streamer.settings.community_goals is True:
                 self.contribute_to_community_goals(streamer)
-
-    def make_predictions(self, event):
-        decision = event.bet.calculate(event.streamer.channel_points)
-        # selector_index = 0 if decision["choice"] == "A" else 1
-
-        logger.info(
-            f"Going to complete bet for {event}",
-            extra={
-                "emoji": ":four_leaf_clover:",
-                "event": Events.BET_GENERAL,
-            },
-        )
-        if event.status == "ACTIVE":
-            skip, compared_value = event.bet.skip()
-            if skip is True:
-                logger.info(
-                    f"Skip betting for the event {event}",
-                    extra={
-                        "emoji": ":pushpin:",
-                        "event": Events.BET_FILTERS,
-                    },
-                )
-                logger.info(
-                    f"Skip settings {event.bet.settings.filter_condition}, current value is: {compared_value}",
-                    extra={
-                        "emoji": ":pushpin:",
-                        "event": Events.BET_FILTERS,
-                    },
-                )
-            else:
-                if decision["amount"] >= 10:
-                    logger.info(
-                        # f"Place {_millify(decision['amount'])} channel points on: {event.bet.get_outcome(selector_index)}",
-                        f"Place {_millify(decision['amount'])} channel points on: {event.bet.get_outcome(decision['choice'])}",
-                        extra={
-                            "emoji": ":four_leaf_clover:",
-                            "event": Events.BET_GENERAL,
-                        },
-                    )
-
-                    json_data = copy.deepcopy(GQLOperations.MakePrediction)
-                    json_data["variables"] = {
-                        "input": {
-                            "eventID": event.event_id,
-                            "outcomeID": decision["id"],
-                            "points": decision["amount"],
-                            "transactionID": token_hex(16),
-                        }
-                    }
-                    response = self.post_gql_request(json_data)
-                    if (
-                        "data" in response
-                        and "makePrediction" in response["data"]
-                        and "error" in response["data"]["makePrediction"]
-                        and response["data"]["makePrediction"]["error"] is not None
-                    ):
-                        error_code = response["data"]["makePrediction"]["error"]["code"]
-                        logger.error(
-                            f"Failed to place bet, error: {error_code}",
-                            extra={
-                                "emoji": ":four_leaf_clover:",
-                                "event": Events.BET_FAILED,
-                            },
-                        )
-                else:
-                    logger.info(
-                        f"Bet won't be placed as the amount {_millify(decision['amount'])} is less than the minimum required 10",
-                        extra={
-                            "emoji": ":four_leaf_clover:",
-                            "event": Events.BET_GENERAL,
-                        },
-                    )
-        else:
-            logger.info(
-                f"Oh no! The event is not active anymore! Current status: {event.status}",
-                extra={
-                    "emoji": ":disappointed_relieved:",
-                    "event": Events.BET_FAILED,
-                },
-            )
 
     def claim_bonus(self, streamer, claim_id):
         if Settings.logger.less is False:

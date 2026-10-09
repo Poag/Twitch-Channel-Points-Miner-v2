@@ -27,7 +27,6 @@ class TwitchWebSocket(WebSocketApp):
 
         self.twitch = parent_pool.twitch
         self.streamers = parent_pool.streamers
-        self.events_predictions = parent_pool.events_predictions
 
         self.last_message_timestamp = None
         self.last_message_type_channel = None

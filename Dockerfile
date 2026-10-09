@@ -11,4 +11,10 @@ RUN pip install --no-cache-dir --upgrade pip \
   && pip install --no-cache-dir -r requirements.txt
 
 ADD ./TwitchChannelPointsMiner ./TwitchChannelPointsMiner
-ENTRYPOINT [ "python", "run.py" ]
+ADD ./assets ./assets
+
+# Cookies, database, logs and analytics all live under this one folder
+ENV TCPM_DATA_DIR=/data
+VOLUME ["/data"]
+
+ENTRYPOINT [ "python", "-m", "TwitchChannelPointsMiner" ]

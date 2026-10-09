@@ -18,18 +18,16 @@ from TwitchChannelPointsMiner.classes.Settings import Events
 from TwitchChannelPointsMiner.classes.Telegram import Telegram
 from TwitchChannelPointsMiner.classes.Pushover import Pushover
 from TwitchChannelPointsMiner.classes.Gotify import Gotify
+from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import remove_emoji
 
 
 # Fore: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 class ColorPalette(object):
     def __init__(self, **kwargs):
-        # Init with default values RESET for all and GREEN and RED only for WIN and LOSE bet
-        # Then set args from kwargs
+        # Init with default value RESET for all, then set args from kwargs
         for k in Events:
             setattr(self, str(k), Fore.RESET)
-        setattr(self, "BET_WIN", Fore.GREEN)
-        setattr(self, "BET_LOSE", Fore.RED)
 
         for k in kwargs:
             if k.upper() in dir(self) and getattr(self, k.upper()) is not None:
@@ -312,8 +310,7 @@ def configure_loggers(username, settings):
     )
 
     if settings.save is True:
-        logs_path = os.path.join(Path().absolute(), "logs")
-        Path(logs_path).mkdir(parents=True, exist_ok=True)
+        logs_path = str(subdir("logs"))
         if settings.auto_clear is True:
             logs_file = os.path.join(
                 logs_path,
