@@ -1,74 +1,79 @@
-![Twitch Channel Points Miner - v2](https://raw.githubusercontent.com/rdavydov/Twitch-Channel-Points-Miner-v2/master/assets/banner.png)
 <p align="center">
-<a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/rdavydov/Twitch-Channel-Points-Miner-v2?style=flat&color=white&logo=github&logoColor=white"></a>
-<a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/rdavydov/Twitch-Channel-Points-Miner-v2?style=flat&color=limegreen&logo=github&logoColor=white"></a>
-<a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/github/license/rdavydov/Twitch-Channel-Points-Miner-v2?style=flat&color=black&logo=unlicense&logoColor=white"></a>
-<a href="https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/rdavydov/Twitch-Channel-Points-Miner-v2?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
+<img src="assets/icon.png" alt="TwitchMiner icon" width="160">
 </p>
 
+<h1 align="center">TwitchMiner</h1>
 
-<h1 align="center">https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2</h1>
+<p align="center"><em>formerly Twitch Channel Points Miner v2</em></p>
 
-**Credits**
-- Main idea: https://github.com/gottagofaster236/Twitch-Channel-Points-Miner
-- Based on: https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2
+<p align="center">
+<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/releases"><img alt="Latest Version" src="https://img.shields.io/github/v/release/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=white&logo=github&logoColor=white"></a>
+<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=limegreen&logo=github&logoColor=white"></a>
+<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2/blob/master/LICENSE"><img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-black?style=flat&logo=gnu&logoColor=white"></a>
+<a href="https://github.com/Poag/Twitch-Channel-Points-Miner-v2"><img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Poag/Twitch-Channel-Points-Miner-v2?style=flat&color=lightyellow&logo=github&logoColor=white"></a>
+</p>
 
-> A simple script that will watch a stream for you and earn the channel points.
-
-> It can wait for a streamer to go live (+_450 points_ when the stream starts), it will automatically click the bonus button (_+50 points_), and it will follow raids (_+250 points_).
+> A script that watches streams for you and earns the channel points. It waits for a streamer to go live (+_450 points_ when the stream starts), clicks the bonus button (_+50 points_), follows raids (_+250 points_), claims drops and moments, and keeps the watch streak going.
 
 Read more about the channel points [here](https://help.twitch.tv/s/article/channel-points-guide).
 
+**TwitchMiner** is a fork of Twitch Channel Points Miner v2. It is configured entirely through **environment variables**, keeps all of its data in **one mountable folder**, claims each drop **only once**, and ships as a multi-arch Docker image. Betting / predictions have been **removed**. See [What's different in this fork](#whats-different-in-this-fork).
+
+## Credits and license
+This project is free software under the **GNU General Public License v3.0** (see [LICENSE](LICENSE)). It is a modified version of a chain of GPL-3.0 projects, and keeps their copyright notices and license:
+
+- Original idea and code: [gottagofaster236/Twitch-Channel-Points-Miner](https://github.com/gottagofaster236/Twitch-Channel-Points-Miner)
+- v2 rewrite: [Tkd-Alex/Twitch-Channel-Points-Miner-v2](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2)
+- Fork this one is based on: [rdavydov/Twitch-Channel-Points-Miner-v2](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2)
+- This fork, **TwitchMiner**: [Poag/Twitch-Channel-Points-Miner-v2](https://github.com/Poag/Twitch-Channel-Points-Miner-v2)
+
+As the GPL requires, any copy or modification you distribute must stay under the GPL-3.0 with its source available. The changes made in this fork are in the git history. The icon in `assets/icon.svg` is new in this fork and is released under the same license.
+
 # README Contents
-1. 🤝 [Community](#community)
-2. 🚀 [Main differences from the original repository](#main-differences-from-the-original-repository)
-3. 🧾 [Logs feature](#logs-feature)
+1. 🚀 [What's different in this fork](#whats-different-in-this-fork)
+2. 🧾 [Logs feature](#logs-feature)
     - [Full logs](#full-logs)
     - [Less logs](#less-logs)
     - [Final report](#final-report)
-4. 🧐 [How to use](#how-to-use)
+3. 🧐 [How to use](#how-to-use)
+    - [Data folder](#data-folder)
     - [Cloning](#by-cloning-the-repository)
     - [Docker](#docker)
-    	- [Docker Hub](#docker-hub)
-		- [Portainer](#portainer)
-    - [Replit](#replit)
     - [Limits](#limits)
-5. 🔧 [Settings](#settings)
-    - [LoggerSettings](#loggersettings)
-    - [StreamerSettings](#streamersettings)
-6. 📈 [Analytics](#analytics)
-7. 🍪 [Migrating from an old repository (the original one)](#migrating-from-an-old-repository-the-original-one)
-8. 🪟 [Windows](#windows)
-9. 📱 [Termux](#termux)
-10. ⚠️ [Disclaimer](#disclaimer)
+4. 🔧 [Settings](#settings)
+5. 📈 [Analytics](#analytics)
+6. 🍪 [Migrating from an old repository](#migrating-from-an-old-repository-the-original-one)
+7. 🪟 [Windows](#windows)
+8. 📱 [Termux](#termux)
+9. ⚠️ [Disclaimer](#disclaimer)
 
+If you want to help, please leave a star 🌟 and read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-## Community
-If you want to help with this project, please leave a star 🌟 and share it with your friends! 😎
+## What's different in this fork
+**Added in this fork**
+- Configuration through `TCPM_*` environment variables (no `run.py` to edit), with an [`.env.example`](.env.example)
+- A single data folder (`TCPM_DATA_DIR`) holding cookies, the drops database, logs and analytics, so Docker needs one volume
+- Each drop is claimed **once only**: attempts are stored in a small per-account database, so a failing claim is never retried and re-notified
+- Drops for a game whose account is **not connected** are skipped, with a warning once a day that includes a countdown to the end of the campaign
+- Multi-arch (`amd64` and `arm64`) images on GHCR, built on native runners, with `latest` on `master`, version tags and a monthly rebuild for security updates
+- Lower idle CPU and memory use (no busy IRC loop, in-memory analytics writes, lazy pandas import, no needless drops polling)
+- Smaller image on a current base (Python 3.12 slim, no compilers needed)
 
-If you want to offer me a coffee, I would be grateful! ❤️
+**Removed in this fork**
+- Betting / predictions and all of their settings, events and colours
+- `run.py` / `example.py` configuration, the Docker Hub image, `arm/v7` builds and the upstream badge workflows
 
-|                                                                                                                                                                                                                                                                                                           |                                               |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-|<a href="https://bitcoin.org" target="_blank"><img src="https://dynamic-assets.coinbase.com/e785e0181f1a23a30d9476038d9be91e9f6c63959b538eabbc51a1abc8898940383291eede695c3b8dfaa1829a9b57f5a2d0a16b0523580346c6b8fab67af14b/asset_icons/b57ac673f06a4b0338a596817eb0a50ce16e2059f327dc117744449a47915cb2.png" alt="Donate BTC" height="16" width="16"></a>|`bc1qq49mvgda2zw4f9kta0a85xztwuxewqwac5eckd` _(<a href="https://bitcoin.org" target="_blank">BTC</a>)_|
-|<a href="https://dogechain.info" target="_blank"><img src="https://dynamic-assets.coinbase.com/3803f30367bb3972e192cd3fdd2230cd37e6d468eab12575a859229b20f12ff9c994d2c86ccd7bf9bc258e9bd5e46c5254283182f70caf4bd02cc4f8e3890d82/asset_icons/1597d628dd19b7885433a2ac2d7de6ad196c519aeab4bfe679706aacbf1df78a.png" alt="Donate DOGE" height="16" width="16"></a>|`DAKzncwKkpfPCm1xVU7u2pConpXwX7HS3D` _(<a href="https://dogechain.info" target="_blank">DOGE</a>)_|
-|<a href="https://www.donationalerts.com/r/rdavydov" target="_blank"><img src="https://www.donationalerts.com/static/donations/dist/favicon.ico" alt="Donate via DonationAlerts" height="16" width="16"></a>|https://www.donationalerts.com/r/rdavydov|
-|<a href="https://boosty.to/rdavydov/donate" target="_blank"><img src="https://static.boosty.to/static/favicon.png?v=11" alt="Donate via Boosty" height="16" width="16"></a>|https://boosty.to/rdavydov/donate|
-
-If you have any issues or you want to contribute, you are welcome! But please read the [CONTRIBUTING.md](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/blob/master/CONTRIBUTING.md) file.
-
-## Main differences from the original repository:
-
-- Improved logging: emojis, colors, files and much more ✔️
-- Final report with all the data ✔️
-- Rewritten codebase now uses classes instead of modules with global variables ✔️
-- Automatic downloading of the list of followers and using it as an input ✔️
-- Better 'Watch Streak' strategy in the priority system [#11](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/11) ✔️
-- Auto claiming [game drops](https://help.twitch.tv/s/article/mission-based-drops) from the Twitch inventory [#21](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/21) ✔️
-- Switchable analytics chart that shows the progress of your points with various annotations [#96](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/96) ✔️
-- Joining the IRC Chat to increase the watch time and get StreamElements points [#47](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/47) ✔️
-- [Moments](https://help.twitch.tv/s/article/moments) claiming [#182](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/182) ✔️
-- Notifying on `@nickname` mention in the Twitch chat [#227](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/227) ✔️
+**Inherited from the upstream projects**
+- Improved logging: emojis, colors, files and much more
+- Final report with all the data
+- Automatic downloading of the list of followers and using it as an input
+- Better 'Watch Streak' strategy in the priority system [#11](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/11)
+- Auto claiming [game drops](https://help.twitch.tv/s/article/mission-based-drops) from the Twitch inventory [#21](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/21)
+- Switchable analytics chart that shows the progress of your points [#96](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/96)
+- Joining the IRC Chat to increase the watch time and get StreamElements points [#47](https://github.com/Tkd-Alex/Twitch-Channel-Points-Miner-v2/issues/47)
+- [Moments](https://help.twitch.tv/s/article/moments) claiming [#182](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/182)
+- Notifying on `@nickname` mention in the Twitch chat [#227](https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2/issues/227)
+- Notifications to Telegram, Discord, Matrix, Pushover, Gotify and generic webhooks
 
 ## Logs feature
 ### Full logs
@@ -92,6 +97,8 @@ If you have any issues or you want to contribute, you are welcome! But please re
 %d/%m/%y %H:%M:%S - INFO - [on_message]: 🚀  +12 → Streamer(username=streamer-username, channel_id=0000000, channel_points=64398) - Reason: WATCH.
 %d/%m/%y %H:%M:%S - INFO - [update_raid]: 🎭  Joining raid from Streamer(username=streamer-username, channel_id=0000000, channel_points=64398) to another-username!
 %d/%m/%y %H:%M:%S - INFO - [on_message]: 🚀  +250 → Streamer(username=streamer-username, channel_id=0000000, channel_points=6845) - Reason: RAID.
+%d/%m/%y %H:%M:%S - INFO - [claim_drop]: 📦  Claim Skin Chest x1 (Skin Chest (10 Skins) x1) 120/120 (100%)
+%d/%m/%y %H:%M:%S - WARNING - [__warn_account_not_connected]: 🔗  Drops available for Elim but your account is not connected to the game, not claiming - campaign ends in 3d 4h 12m. Connect it at https://www.twitch.tv/drops/inventory
 ```
 ### Less logs
 ```
@@ -188,12 +195,6 @@ If you don't mount `/data` you lose the login, logs and analytics when the conta
 _**Twitch has a limit - you can't watch more than two channels at one time. We take the first two streamers from the list as they have the highest priority.**_
 
 Make sure to write `TCPM_STREAMERS` in order of priority from left to right. If you use `TCPM_FOLLOWERS=true` you can choose to download the followers sorted by follow date (`TCPM_FOLLOWERS_ORDER=ASC` or `DESC`).
-
-### Replit
-
-Official Repl: https://replit.com/@rdavydov/Twitch-Channel-Points-Miner-v2
-
-Provided "as is" with no support. Testing purposes only. Updates may be delayed.
 
 ## Settings
 All settings are environment variables. Booleans accept `true/false`, `1/0`, `yes/no`, `on/off`; lists are comma separated.
@@ -345,7 +346,7 @@ pkg install python-pandas
 
 **4. Clone this repository**
 
-`git clone https://github.com/rdavydov/Twitch-Channel-Points-Miner-v2`
+`git clone https://github.com/Poag/Twitch-Channel-Points-Miner-v2`
 
 **5. Go to the miner's directory**
 
@@ -358,7 +359,6 @@ pkg install python-pandas
 **7. Install packages**
 ```
 pip install -r requirements.txt
-pip install Twitch-Channel-Points-Miner-v2
 ```
 
 **8. Run the miner!**
