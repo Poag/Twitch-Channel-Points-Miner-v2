@@ -9,6 +9,7 @@ from flask import Flask, Response, cli, render_template, request
 
 from TwitchChannelPointsMiner.classes.Settings import Settings
 from TwitchChannelPointsMiner.classes.DropsDB import DropsDB
+from TwitchChannelPointsMiner.classes.LogBuffer import LOG_BUFFER
 from TwitchChannelPointsMiner.paths import subdir
 from TwitchChannelPointsMiner.utils import download_file
 
@@ -227,26 +228,6 @@ def check_assets():
                 download_assets(assets_folder, required_files)
                 break
 
-def current_log_file(username):
-    """The file the miner is writing right now: the path it registered at startup, or else
-    the newest log of this user (named <username>.log, or <username>.<timestamp>.log
-    when TCPM_LOG_AUTO_CLEAR=false)."""
-    registered = getattr(Settings, "logs_file", None)
-    if registered:
-        return str(registered)
-    logs_dir = str(subdir("logs"))
-    candidates = [
-        os.path.join(logs_dir, f)
-        for f in os.listdir(logs_dir)
-        if f == f"{username}.log" or (f.startswith(f"{username}.") and f.endswith(".log"))
-    ]
-    return max(candidates, key=os.path.getmtime) if candidates else None
-
-
-# Log panel: first load shows this much of the end of the file, then at most this much per poll
-LOG_TAIL_BYTES = 64 * 1024
-LOG_CHUNK_BYTES = 256 * 1024
-
 class AnalyticsServer(Thread):
     def __init__(
         self,
@@ -267,54 +248,20 @@ class AnalyticsServer(Thread):
         self.username = username
 
         def generate_log():
-            """Return the log text after the byte `offset` the client already has.
+            """Log lines after sequence number `since` (the last `X-Log-Seq` the page got).
 
-            The new offset is sent back in the X-Log-Offset header. Offsets are bytes (not
-            characters), so emojis can't make the client and server drift apart. A first
-            request (no offset) gets only the tail of the file, and a file that got smaller
-            (daily rotation) is read again from the start.
-            """
-            log_file_path = current_log_file(username)
-            if log_file_path is None:
-                return Response(
-                    "No log file found. Logs are only written when TCPM_LOG_SAVE=true.",
-                    status=404,
-                    mimetype="text/plain",
-                )
+            Served from the in-memory buffer of the running miner, not from a file. When the
+            miner restarted (the page is ahead of us) the page is told to start over."""
             try:
-                offset = int(request.args.get("offset", -1))
+                since = int(request.args.get("since", -1))
             except ValueError:
-                offset = -1
-            try:
-                size = os.path.getsize(log_file_path)
-                with open(log_file_path, "rb") as log_file:
-                    if offset < 0:
-                        # First load: only the last part, starting on a whole line
-                        offset = max(0, size - LOG_TAIL_BYTES)
-                        if offset > 0:
-                            log_file.seek(offset - 1)
-                            if log_file.read(1) != b"\n":
-                                log_file.readline()
-                                offset = log_file.tell()
-                    elif offset > size:
-                        offset = 0  # rotated or truncated
-                    log_file.seek(offset)
-                    chunk = log_file.read(LOG_CHUNK_BYTES)
-            except FileNotFoundError:
-                return Response(
-                    f"Log file not found yet: {log_file_path}",
-                    status=404,
-                    mimetype="text/plain",
-                )
-
-            # Only hand out complete lines so a half written line (or a split emoji) isn't cut
-            end = chunk.rfind(b"\n") + 1
-            chunk = chunk[:end]
+                since = -1
+            seq, lines, reset = LOG_BUFFER.since(since)
             return Response(
-                chunk.decode("utf-8", errors="replace"),
+                "".join(line + "\n" for line in lines),
                 status=200,
                 mimetype="text/plain",
-                headers={"X-Log-Offset": str(offset + end)},
+                headers={"X-Log-Seq": str(seq), "X-Log-Reset": "1" if reset else "0"},
             )
 
         self.app = Flask(

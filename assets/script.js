@@ -117,32 +117,33 @@ $(document).ready(function () {
         }
     });
 
-    // Poll the log endpoint. The server tells us the byte offset to continue from.
+    // Poll the log endpoint. The server numbers its lines and tells us the last number we got.
     var logTimer = null;
     function getLog() {
         clearTimeout(logTimer);
         if (!isLogCheckboxChecked) return;
         $.ajax({
             url: '/log',
-            data: { offset: lastReceivedLogIndex },
+            data: { since: lastReceivedLogIndex },
             dataType: 'text',
             cache: false
         }).done(function (data, status, xhr) {
-            if (lastReceivedLogIndex === -1) $("#log-content").text('');  // drop the placeholder text
-            var next = parseInt(xhr.getResponseHeader('X-Log-Offset'));
-            if (!isNaN(next)) {
-                if (next < lastReceivedLogIndex) $("#log-content").text('');  // log file was rotated
-                lastReceivedLogIndex = next;
+            var box = $("#log-content")[0];
+            var wasFirst = lastReceivedLogIndex === -1;
+            // First load, or the miner restarted: start from a clean panel
+            if (lastReceivedLogIndex === -1 || xhr.getResponseHeader('X-Log-Reset') === '1') {
+                $("#log-content").text('');
             }
+            var seq = parseInt(xhr.getResponseHeader('X-Log-Seq'));
+            if (!isNaN(seq)) lastReceivedLogIndex = seq;
             if (data) {
-                var box = $("#log-content")[0];
                 var atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
                 $("#log-content").append(document.createTextNode(data));
-                if (atBottom) $("#log-content").scrollTop(box.scrollHeight);
+                // Keep the panel from growing without limit
+                var text = box.textContent;
+                if (text.length > 400000) box.textContent = text.slice(text.length - 300000);
+                if (atBottom || wasFirst) box.scrollTop = box.scrollHeight;
             }
-        }).fail(function (xhr) {
-            // e.g. logs not saved, or the file isn't there yet: say so instead of staying blank
-            if (lastReceivedLogIndex === -1 && xhr.responseText) $("#log-content").text(xhr.responseText);
         }).always(function () {
             // Keep polling after errors too, so a restart of the miner doesn't stop the log
             if (isLogCheckboxChecked && autoUpdateLog) logTimer = setTimeout(getLog, 1000);
